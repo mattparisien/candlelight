@@ -80,6 +80,15 @@ npm run build
 npm run build:plugins
 ```
 
+**Deploy plugins to server:**
+```bash
+# Build and deploy in one command
+npm run build:deploy
+
+# Or separately
+npm run deploy:plugins
+```
+
 **Start production server:**
 ```bash
 npm run start:server
@@ -146,6 +155,9 @@ PluginName/
 | `npm run dev:plugins` | Start only plugin development server |
 | `npm run dev:server` | Start only authentication server |
 | `npm run build` | Build plugins for production |
+| `npm run build:production` | Build plugins and deploy for production |
+| `npm run deploy:plugins` | Deploy built plugins to server |
+| `npm run build:deploy` | Build and deploy plugins in one command |
 | `npm run install-all` | Install dependencies for all workspaces |
 | `npm run clean` | Remove all node_modules and dist directories |
 
@@ -173,15 +185,34 @@ PORT=3001
 
 ## 🚢 Deployment
 
+### Railway (Recommended)
+
+1. **Push to GitHub and connect Railway**
+2. **Set environment variables in Railway dashboard:**
+   ```
+   NODE_ENV=production
+   MONGODB_URI=mongodb+srv://your-atlas-connection
+   PORT=3001
+   BASE_URL=https://your-app.railway.app
+   ```
+3. **Railway will automatically build and deploy**
+
+The deployment process:
+- Installs all dependencies
+- Builds plugins for production
+- Deploys plugins to server static directory
+- Starts the Express server
+
 ### Frontend Plugins
 - Built files are output to `packages/plugins/dist/`
 - Can be deployed to any static hosting service (Netlify, Vercel, etc.)
 - Netlify configuration included (`netlify.toml`)
 
 ### Backend Server
-- Standard Node.js deployment
-- Ensure MongoDB connection is configured
-- Set appropriate environment variables
+- Deployed with Railway, Render, or any Node.js hosting
+- Serves both API endpoints and static plugin files
+- Health check endpoint at `/health`
+- Plugin files served at `/plugins/*`
 
 ## 🤝 Contributing
 

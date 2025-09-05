@@ -60,6 +60,13 @@ async function main() {
       console.log('✅ Build complete!');
       break;
       
+    case 'deploy':
+      console.log('🚀 Building and deploying plugins...');
+      await runCommand('npm', ['run', 'build'], path.join(PACKAGES_DIR, 'plugins'));
+      await runCommand('node', ['deploy-plugins.js'], __dirname);
+      console.log('✅ Deployment complete!');
+      break;
+      
     case 'clean':
       console.log('🧹 Cleaning node_modules and dist directories...');
       await runCommand('rm', ['-rf', 'node_modules', 'packages/*/node_modules', 'packages/*/dist'], __dirname);
@@ -79,6 +86,7 @@ async function main() {
 Available commands:
   dev      - Start both plugins and server in development mode
   build    - Build plugins for production
+  deploy   - Build plugins and deploy to server
   clean    - Remove all node_modules and dist directories
   install  - Install dependencies for all workspaces
 
@@ -88,6 +96,7 @@ Usage:
 Examples:
   node dev.js dev
   node dev.js build
+  node dev.js deploy
   node dev.js clean
       `);
   }

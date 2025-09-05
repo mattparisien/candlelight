@@ -39,6 +39,29 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static plugin files from dist/public
+const publicPath = path.join(__dirname, 'dist', 'public');
+app.use('/plugins', express.static(publicPath, {
+  maxAge: '1h', // Cache for 1 hour
+  etag: true,
+  lastModified: true
+}));
+
+// Serve deployment manifest
+app.get('/plugins/manifest', (req, res) => {
+  try {
+    const manifestPath = path.join(publicPath, 'deployment-manifest.json');
+    if (require('fs').existsSync(manifestPath)) {
+      const manifest = require(manifestPath);
+      res.json(manifest);
+    } else {
+      res.status(404).json({ error: 'No deployment manifest found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Error reading manifest' });
+  }
+});
+
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI)
   .then(() => {

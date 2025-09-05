@@ -98,7 +98,11 @@ module.exports = {
         },
       ],
     }),
-    new EnvironmentPlugin(["BASE_URL"]), // List all environment variables you use here
+    new EnvironmentPlugin({
+      BASE_URL: process.env.NODE_ENV === 'production' 
+        ? 'https://your-app.railway.app' // Default production URL
+        : 'http://localhost:3000'        // Default development URL
+    }), // Environment variables with defaults
   ],
   performance: {
     hints: false, // Suppress bundle size warnings
