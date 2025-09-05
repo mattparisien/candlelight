@@ -56,15 +56,22 @@ function extractDomain(url) {
 
 // Helper function to get plugin name from request path
 function getPluginNameFromPath(path) {
-  console.log('the path', path);
   // Handle format: /plugins/{pluginName}/main.js
   const pathParts = path.split('/');
   let pluginFolder;
 
-  const pluginIndex = pathParts.indexOf('plugins');
-  if (pluginIndex !== -1 && pathParts.length > pluginIndex + 1) {
-    pluginFolder = pathParts[pluginIndex + 1];
+  if (path.includes("/plugins/")) {
+    // Find the segment after /plugins/
+    const pluginIndex = pathParts.indexOf('plugins');
+    if (pluginIndex !== -1 && pathParts.length > pluginIndex + 1) {
+      pluginFolder = pathParts[pluginIndex + 1];
+    }
+  } else {
+    // Handle format: /{pluginName}/bundle.js
+    pluginFolder = pathParts[0]; // First segment after root
   }
+
+  console.log('Extracted plugin folder:', pluginFolder);
 
   if (!pluginFolder) {
     return null;
