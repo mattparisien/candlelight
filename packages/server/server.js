@@ -139,7 +139,7 @@ app.delete('/admin/domains/:id', async (req, res) => {
 });
 
 // Create dist directory structure if it doesn't exist
-const distPath = path.join(__dirname, 'dist');
+const distPath = path.join(__dirname, 'dist', 'public');
 const fs = require('fs');
 
 // Create main dist directory
