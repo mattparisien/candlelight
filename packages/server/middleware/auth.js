@@ -68,7 +68,7 @@ function getPluginNameFromPath(path) {
     }
   } else {
     // Handle format: /{pluginName}/bundle.js
-    pluginFolder = pathParts[0]; // First segment after root
+    pluginFolder = pathParts[1]; // First segment after root
   }
 
   console.log('Extracted plugin folder:', pluginFolder);
