@@ -148,7 +148,6 @@ async function authenticateRequest(req, res, next) {
 
     // Get plugin name from request path
     const pluginName = getPluginNameFromPath(requestPath);
-    console.log('Plugin requested:', pluginName);
     if (!pluginName) {
       console.log('Could not determine plugin name from path:', requestPath);
       return res.status(403).json({
@@ -157,6 +156,11 @@ async function authenticateRequest(req, res, next) {
     }
 
     // Check database for authorized domain
+
+    const domains = await AuthorizedDomain.find({});
+    console.log('Authorized domains in DB:', domains.map(d => d.websiteUrl));
+    
+
     const authorizedDomain = await AuthorizedDomain.findOne({
       websiteUrl: domain,
       status: 'active'
