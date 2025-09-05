@@ -157,33 +157,15 @@ pluginDirs.forEach(dir => {
 });
 
 // Serve protected plugin files with authentication
-app.use('/plugins', (req, res, next) => {
-  console.log(`🔐 Starting auth check for: ${req.path}`);
-  next();
-}, authenticateRequest, (req, res, next) => {
-  console.log(`🎉 Authentication passed  for: ${req.path}`);
-  const filePath = path.join(distPath, req.path.replace('/plugins', ''));
-  
-  if (fs.existsSync(filePath)) {
-    console.log(`✅ File found and serving: ${req.path} -> ${filePath}`);
-  } else {
-    console.log(`❌ File not found: ${req.path} -> ${filePath}`);
-  }
-  
-  next();
-}, express.static(distPath, {
+app.use('/plugins', authenticateRequest, express.static(distPath, {
   setHeaders: (res, path) => {
-    console.log(`📤 Serving file: ${path}`);
-    
     // Set appropriate headers for JavaScript files
     if (path.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
     }
     
-    // Disable all caching
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
+    // Cache control
+    res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
   }
 }));
 
