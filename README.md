@@ -188,14 +188,18 @@ PORT=3001
 ### Railway (Recommended)
 
 1. **Push to GitHub and connect Railway**
-2. **Set environment variables in Railway dashboard:**
+2. **Set initial environment variables in Railway dashboard:**
    ```
    NODE_ENV=production
    MONGODB_URI=mongodb+srv://your-atlas-connection
    PORT=3001
-   BASE_URL=https://your-app.railway.app
+   BASE_URL=https://temporary-url.railway.app  # Will update this in step 4
    ```
 3. **Railway will automatically build and deploy**
+4. **Get your actual Railway URL** from the Deployments tab
+   - Format: `https://your-project-production.up.railway.app`
+5. **Update BASE_URL** environment variable with your actual URL
+6. **Railway will auto-redeploy** with the correct URL
 
 The deployment process:
 - Installs all dependencies

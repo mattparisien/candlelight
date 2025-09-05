@@ -8,9 +8,24 @@
    NODE_ENV=production
    MONGODB_URI=mongodb+srv://your-atlas-connection
    PORT=3001
-   BASE_URL=https://your-app.railway.app
+   BASE_URL=https://your-app.railway.app  # You'll get the actual URL after step 4
    ```
 3. **Deploy automatically** on git push
+4. **Get your app URL** from Railway dashboard (Deployments tab)
+5. **Update BASE_URL** environment variable with your actual Railway URL
+
+## Finding Your Railway App URL
+
+After deployment, Railway provides a URL like:
+```
+https://sqsp-plugins-production.up.railway.app
+```
+
+**To find it:**
+1. Go to Railway dashboard → Your project → Deployments tab
+2. Copy the provided URL
+3. Update the `BASE_URL` environment variable with this URL
+4. Redeploy (Railway will auto-redeploy when you change env vars)
 
 ## Alternative: One-Click Deploy
 
