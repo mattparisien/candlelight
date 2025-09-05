@@ -95,8 +95,8 @@ function getPluginNameFromPath(path) {
   }
 }
 
-return null;
-}
+
+
 
 // Main authentication middleware
 async function authenticateRequest(req, res, next) {
