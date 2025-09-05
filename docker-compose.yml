@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # MongoDB database
+  mongodb:
+    image: mongo:latest
+    container_name: plugins-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: plugins
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - plugins-network
+
+  # Authentication Server
+  server:
+    build: 
+      context: ./packages/server
+      dockerfile: Dockerfile
+    container_name: plugins-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/plugins
+      - PORT=3001
+    depends_on:
+      - mongodb
+    networks:
+      - plugins-network
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: plugins-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./packages/plugins/dist:/usr/share/nginx/html
+    depends_on:
+      - server
+    networks:
+      - plugins-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  plugins-network:
+    driver: bridge

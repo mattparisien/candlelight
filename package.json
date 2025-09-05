@@ -1,0 +1,33 @@
+{
+  "name": "sqsp-plugins-monorepo",
+  "version": "1.0.0",
+  "description": "Monorepo for Squarespace plugins and authentication server",
+  "private": true,
+  "workspaces": [
+    "packages/plugins",
+    "packages/server"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=packages/plugins & npm run dev --workspace=packages/server",
+    "dev:plugins": "npm run dev --workspace=packages/plugins",
+    "dev:server": "npm run dev --workspace=packages/server",
+    "build": "npm run build --workspace=packages/plugins",
+    "build:plugins": "npm run build --workspace=packages/plugins",
+    "start:server": "npm run start --workspace=packages/server",
+    "create-plugin": "npm run create-plugin --workspace=packages/plugins",
+    "create-plugin-mixin": "npm run create-plugin-mixin --workspace=packages/plugins",
+    "install-all": "npm install && npm install --workspace=packages/plugins && npm install --workspace=packages/server",
+    "clean": "rm -rf packages/*/node_modules packages/*/dist node_modules",
+    "lint": "echo 'Add linting setup here'",
+    "test": "echo 'Add testing setup here'"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

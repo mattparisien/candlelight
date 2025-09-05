@@ -1,0 +1,8 @@
+<svg class="svg-mask">
+    <defs>
+        <mask id="reveal-mask">
+            <rect x="0" y="0" width="100%" height="100%" fill="black" />
+            <g></g>
+        </mask>
+    </defs>
+</svg>

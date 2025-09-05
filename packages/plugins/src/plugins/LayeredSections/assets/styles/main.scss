@@ -1,0 +1,69 @@
+@font-face {
+  font-family: "Opposit";
+  src: url("../fonts/Opposit-Regular.woff") format("woff");
+}
+
+body {
+  margin: 0;
+  min-width: 100vw;
+  min-height: 100vh;
+}
+
+[data-candlelight-plugin-layered-sections-container] {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+
+  .page-section {
+    height: 100vh !important;
+    width: 100%;
+  }
+
+  .page-section:nth-child(1) {
+    position: relative !important;
+    background-color: rgb(252, 251, 248);
+    font-family: "Opposit", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8vw;
+    padding: 2vw;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    
+    p {
+      margin: 0;
+      text-align: center;
+      max-width: 100%;
+      line-height: 1.1;
+    }
+  }
+
+  .page-section:nth-child(2) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f15236;
+    color: #fbc9c2;
+    transition: transform 0.3s ease;
+    font-family: "Opposit", sans-serif;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    font-size: 5vw;
+    padding: 2vw;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    
+    p {
+      margin: 0;
+      max-width: 100%;
+      line-height: 1.2;
+    }
+  }
+}

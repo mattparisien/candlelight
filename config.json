@@ -1,0 +1,23 @@
+{
+  "development": {
+    "plugins": {
+      "port": 3000,
+      "host": "localhost",
+      "hmr": true
+    },
+    "server": {
+      "port": 3001,
+      "host": "localhost",
+      "mongodb": "mongodb://localhost:27017/plugins-dev"
+    }
+  },
+  "production": {
+    "plugins": {
+      "buildPath": "./packages/plugins/dist"
+    },
+    "server": {
+      "port": 8080,
+      "mongodb": "mongodb://localhost:27017/plugins-prod"
+    }
+  }
+}
