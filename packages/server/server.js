@@ -157,7 +157,11 @@ pluginDirs.forEach(dir => {
 });
 
 // Serve protected plugin files with authentication
-app.use('/plugins', authenticateRequest, (req, res, next) => {
+app.use('/plugins', (req, res, next) => {
+  console.log(`🔐 Starting auth check for: ${req.path}`);
+  next();
+}, authenticateRequest, (req, res, next) => {
+  console.log(`🎉 Authentication passed for: ${req.path}`);
   const filePath = path.join(distPath, req.path.replace('/plugins', ''));
   
   if (fs.existsSync(filePath)) {
