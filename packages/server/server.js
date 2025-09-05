@@ -39,13 +39,6 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static plugin files from dist/public
-const publicPath = path.join(__dirname, 'dist', 'public');
-app.use('/plugins', express.static(publicPath, {
-  maxAge: '1h', // Cache for 1 hour
-  etag: true,
-  lastModified: true
-}));
 
 // Serve deployment manifest
 app.get('/plugins/manifest', (req, res) => {
