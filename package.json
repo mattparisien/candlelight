@@ -23,6 +23,8 @@
     "clean": "rm -rf packages/*/node_modules packages/*/dist node_modules",
     "deploy:railway": "npm run deploy:railway --workspace=packages/server",
     "deploy:render": "npm run deploy:render --workspace=packages/server",
+    "domains:add": "npm run domains:add --workspace=packages/server",
+    "domains:list": "npm run domains:list --workspace=packages/server",
     "lint": "echo 'Add linting setup here'",
     "test": "echo 'Add testing setup here'"
   },

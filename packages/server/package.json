@@ -8,7 +8,9 @@
     "build": "echo 'Server build complete - ready for deployment'",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy:railway": "railway up",
-    "deploy:render": "echo 'Push to GitHub - Render will auto-deploy'"
+    "deploy:render": "echo 'Push to GitHub - Render will auto-deploy'",
+    "domains:add": "node scripts/manage-domains.js add",
+    "domains:list": "node scripts/manage-domains.js list"
   },
   "keywords": ["authentication", "plugins", "squarespace"],
   "author": "",
