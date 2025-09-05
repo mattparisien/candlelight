@@ -177,7 +177,7 @@ app.use('/plugins', authenticateRequest, (req, res, next) => {
     }
     
     // Cache control
-    res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+    // res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
   }
 }));
 
