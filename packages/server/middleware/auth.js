@@ -56,6 +56,7 @@ function extractDomain(url) {
 
 // Helper function to get plugin name from request path
 function getPluginNameFromPath(path) {
+  console.log('the path', path);
   // Handle format: /plugins/{pluginName}/main.js
   const pathParts = path.split('/');
   let pluginFolder;
@@ -105,6 +106,8 @@ async function authenticateRequest(req, res, next) {
     const origin = req.get('Origin');
     const userAgent = req.get('User-Agent');
     const requestPath = req.path;
+
+    console.log('the path', requestPath);
 
     console.log('Auth check:', {
       referer,
