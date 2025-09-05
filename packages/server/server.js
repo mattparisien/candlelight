@@ -157,8 +157,20 @@ pluginDirs.forEach(dir => {
 });
 
 // Serve protected plugin files with authentication
-app.use('/plugins', authenticateRequest, express.static(distPath, {
+app.use('/plugins', authenticateRequest, (req, res, next) => {
+  const filePath = path.join(distPath, req.path.replace('/plugins', ''));
+  
+  if (fs.existsSync(filePath)) {
+    console.log(`✅ File found and serving: ${req.path} -> ${filePath}`);
+  } else {
+    console.log(`❌ File not found: ${req.path} -> ${filePath}`);
+  }
+  
+  next();
+}, express.static(distPath, {
   setHeaders: (res, path) => {
+    console.log(`📤 Serving file: ${path}`);
+    
     // Set appropriate headers for JavaScript files
     if (path.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
