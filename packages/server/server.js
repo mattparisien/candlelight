@@ -176,8 +176,10 @@ app.use('/plugins', authenticateRequest, (req, res, next) => {
       res.setHeader('Content-Type', 'application/javascript');
     }
     
-    // Cache control
-    // res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+    // Disable all caching
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
   }
 }));
 
