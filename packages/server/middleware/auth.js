@@ -40,18 +40,14 @@ function extractDomain(url) {
   try {
     const parsed = new URL(url);
     let hostname = parsed.hostname.toLowerCase();
-    
-    // Handle Squarespace domains
-    if (hostname.includes('.squarespace.com')) {
-      return hostname;
-    }
-    
-    // Handle custom domains
-    if (hostname.startsWith('www.')) {
-      hostname = hostname.substring(4);
-    }
-    
-    return hostname;
+
+    return hostname
+    .replace("www.", "")
+    .replace("http://", "")
+    .replace("https://", "")
+    .replace(/\/$/, "") // Remove trailing slash
+    .trim();
+
   } catch (error) {
     console.error('Error parsing URL:', url, error);
     return null;
@@ -125,6 +121,7 @@ async function authenticateRequest(req, res, next) {
     
     // Extract domain from referer or origin
     const domain = extractDomain(referer || origin);
+    console.log('Extracted domain:', domain);
     if (!domain) {
       console.log('No valid domain found in request');
       return res.status(403).json({ 
@@ -134,6 +131,7 @@ async function authenticateRequest(req, res, next) {
     
     // Get plugin name from request path
     const pluginName = getPluginNameFromPath(requestPath);
+    console.log('Plugin requested:', pluginName);
     if (!pluginName) {
       console.log('Could not determine plugin name from path:', requestPath);
       return res.status(403).json({ 
