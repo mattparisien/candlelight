@@ -35,16 +35,11 @@ class MouseFollower
   private _color: string = "#FBC9C2";
   private _radius: number = 20;
   private _speed: number = 0.1;
-  private _fadeSpeedMultiplier: number = 4; // fadeSpeed will be speed * this multiplier
+  private _fadeSpeed: number = 0.3; // Static fade speed
 
   private _colorProxy: string = this._color;
   private _radiusProxy: number = this._radius;
   private _isHoveringInteractive: boolean = false;
-
-  // Calculated fade speed based on movement speed
-  private get _fadeSpeed(): number {
-    return this._speed * this._fadeSpeedMultiplier;
-  }
 
   posX = 0;
   posY = 0;
@@ -79,6 +74,10 @@ class MouseFollower
       {
         event: EMouseEvent.Enter,
         handler: this.onMouseEnter.bind(this),
+      },
+      {
+        event: EMouseEvent.Leave,
+        handler: this.onMouseLeave.bind(this),
       },
     ]);
   }
@@ -177,7 +176,17 @@ class MouseFollower
     }
   }
 
-  onMouseEnter(event: MouseEvent): void { }
+  onMouseEnter(event: MouseEvent): void {
+    // Scale back in when mouse enters the page
+    if (this._radius === 0) {
+      this.scaleIn();
+    }
+  }
+
+  onMouseLeave(event: MouseEvent): void {
+    // Scale out when mouse leaves the page
+    this.scaleOut();
+  }
 
   onMouseOut(event: MouseEvent): void {
     // this.scaleOut();
