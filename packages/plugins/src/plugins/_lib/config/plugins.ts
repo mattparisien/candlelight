@@ -6,7 +6,7 @@ export const pluginConfiguration: PluginConfiguration[] = [
     name: "MagneticButton",
     displayName: "Magnetic Button",
     tree: HTML_SELECTOR_MAP.get("button"),
-    isActive: false,
+    isActive: true,
     module: () => import("../../MagneticButton/model"),
   },
   {
@@ -19,17 +19,17 @@ export const pluginConfiguration: PluginConfiguration[] = [
       appendTo: HTML_SELECTOR_MAP.get("body"),
     },
   },
-  // {
-  //   name: "ImageTrailer",
-  //   displayName: "Image Trailer",
-  //   module: () => import("../../ImageTrailer/model"),
-  //   isActive: false,
-  //   tree: HTML_SELECTOR_MAP.get("section")
-  // },
-  // {
-  //   name: "LayeredSections",
-  //   displayName: "Layered Sections",
-  //   module: () => import("../../LayeredSections/model"),
-  //   isActive: false,
-  // }
+  {
+    name: "ImageTrailer",
+    displayName: "Image Trailer",
+    module: () => import("../../ImageTrailer/model"),
+    isActive: false,
+    tree: HTML_SELECTOR_MAP.get("section")
+  },
+  {
+    name: "LayeredSections",
+    displayName: "Layered Sections",
+    module: () => import("../../LayeredSections/model"),
+    isActive: false,
+  }
 ];
