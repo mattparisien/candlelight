@@ -2,13 +2,13 @@ import { PluginConfiguration } from "../ts/types";
 import { HTML_SELECTOR_MAP } from "./domMappings";
 
 export const pluginConfiguration: PluginConfiguration[] = [
-  // {
-  //   name: "MagneticButton",
-  //   displayName: "Magnetic Button",
-  //   tree: HTML_SELECTOR_MAP.get("button"),
-  //   isActive: false,
-  //   module: () => import("../../MagneticButton/model"),
-  // },
+  {
+    name: "MagneticButton",
+    displayName: "Magnetic Button",
+    tree: HTML_SELECTOR_MAP.get("button"),
+    isActive: false,
+    module: () => import("../../MagneticButton/model"),
+  },
   {
     name: "MouseFollower",
     displayName: "Mouse Follower",
