@@ -1,9 +1,7 @@
 import gsap from "gsap";
-import {
-  AnimationFrameService,
-  CanvasService,
-  MouseEventsService,
-} from "../_lib/services";
+import AnimationFrameService from "../_lib/services/AnimationFrameService";
+import CanvasService from "../_lib/services/CanvasService";
+import MouseEventsService from "../_lib/services/MouseEventsService";
 import { EMouseEvent } from "../_lib/services/MouseEventsService";
 import { PluginOptions } from "../_lib/ts/types";
 import PluginBase from "../_PluginBase/model";

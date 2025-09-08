@@ -1,7 +1,5 @@
 import { HTML_SELECTOR_MAP, SQSP_ENV_SELECTOR_MAP } from "../_lib/config/domMappings";
-import {
-  AnimationFrameService
-} from "../_lib/services";
+import AnimationFrameService from "../_lib/services/AnimationFrameService";
 import { PluginOptions } from "../_lib/ts/types";
 import DomUtils from "../_lib/utils/DomUtils";
 import PluginBase from "../_PluginBase/model";

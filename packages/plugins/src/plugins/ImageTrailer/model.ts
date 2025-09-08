@@ -1,4 +1,5 @@
-import { AnimationFrameService, MouseEventsService } from "../_lib/services";
+import AnimationFrameService from "../_lib/services/AnimationFrameService";
+import MouseEventsService from "../_lib/services/MouseEventsService";
 import ImageService, { IImageDetails } from "../_lib/services/ImageService";
 import { EMouseEvent } from "../_lib/services/MouseEventsService";
 import { EAspectRatio, PluginOptions } from "../_lib/ts/types";

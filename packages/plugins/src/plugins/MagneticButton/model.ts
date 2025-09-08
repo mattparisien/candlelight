@@ -1,7 +1,8 @@
-import { MagneticService, MouseEventsService } from "../_lib/services";
+import MouseEventsService from "../_lib/services/MouseEventsService";
+import MagneticService from "../_lib/services/MagneticService";
 import { EMouseEvent } from "../_lib/services/MouseEventsService";
 import { PluginOptions } from "../_lib/ts/types";
-import PluginBase, { PluginAllowedOptions } from "../_PluginBase/model";
+import PluginBase from "../_PluginBase/model";
 
 interface IMagneticButtonOptions {
   strength: number;

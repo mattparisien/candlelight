@@ -14,8 +14,11 @@ module.exports = {
   entry: generateEntryPoints(),
   output: {
     filename: "[name]/bundle.js",
+    chunkFilename: "[name].[contenthash].js",
     path: path.resolve(__dirname, "dist"),
+    clean: true
   },
+
   devServer: {
     static: {
       directory: path.resolve(__dirname, "dist"),
@@ -99,7 +102,7 @@ module.exports = {
       ],
     }),
     new EnvironmentPlugin({
-      BASE_URL: process.env.NODE_ENV === 'production' 
+      BASE_URL: process.env.NODE_ENV === 'production'
         ? 'sqsp-pluginsserver-production.up.railway.app' // Default production URL
         : 'http://localhost:3000'        // Default development URL
     }), // Environment variables with defaults

@@ -1,4 +1,3 @@
-import { has } from "lodash";
 import PluginService from "./PluginService";
 
 export enum EMouseEvent {
@@ -108,7 +107,7 @@ class MouseEventsService extends PluginService {
     if (this.isHovering) this.isHovering = false;
     callback?.(event);
   }
-  
+
   private calculateMouseSpeed(currentX: number, currentY: number): void {
     const currentTime = Date.now();
     const timeElapsed = (currentTime - this._prevTime) / 1000; // Time in seconds
