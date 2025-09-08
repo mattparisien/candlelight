@@ -16,7 +16,7 @@ export const UNIFIED_SELECTOR_MAP = new Map<string, SelectorConfig>([
   ["footer", { selector: "footer", category: "navigation" }],
   
   // Content elements
-  ["button", { selector: ".sqs-block-button-element", category: "content" }],
+  ["button", { selector: ".sqs-add-to-cart-button,.sqs-block-button-element", category: "content" }],
   ["link", { selector: "a,button", category: "content" }],
   ["section", { selector: "section.page-section", category: "content" }],
   
