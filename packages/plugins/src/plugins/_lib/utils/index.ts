@@ -110,18 +110,15 @@ export async function initializePlugin(pluginName: string): Promise<void> {
         console.log(`Initializing plugin: ${pluginName}`);
       }
 
-      console.log('before getting options');
       options = getPluginOptionsFromScript(script);
       plugin = await getPlugin(pluginName); // Get the plugin object from API
 
 
-      console.log('the plugin is ', plugin);
       if (!plugin)
         throw new Error(
           `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`
         );
 
-        console.log('the plyugin is', plugin);
 
       if (plugin.isActive && plugin.module) {
         module = await plugin.module(); // Load the module from plugin configuration
@@ -134,7 +131,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
 
         // Use treeConfig from the API response, fallback to HTML_SELECTOR_MAP
         const treeConfig = plugin.treeConfig;
-        console.log('the three config is', treeConfig);
+
         if (treeConfig) {
           if (isHTMLSelector(treeConfig)) {
             containerNodes = getContainersBySelector(treeConfig as HTMLSelector);
