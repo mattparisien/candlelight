@@ -23,13 +23,7 @@ class PluginDataService {
       return 'http://localhost:3001';
     }
     
-    // In production, use environment variable or fallback
-    console.log('Environment variables:', { 
-      VITE_PLUGIN_SERVER_URL: process.env.VITE_PLUGIN_SERVER_URL,
-      PLUGIN_SERVER_URL: process.env.PLUGIN_SERVER_URL 
-    });
-    
-    const baseUrl = process.env.VITE_PLUGIN_SERVER_URL || process.env.PLUGIN_SERVER_URL || 'https://sqsp-pluginsserver-production.up.railway.app';
+    const baseUrl = process.env.PLUGIN_SERVER_URL || 'https://sqsp-pluginsserver-production.up.railway.app';
     console.log('Using base URL:', baseUrl);
     return baseUrl;
   }
@@ -127,8 +121,6 @@ class PluginDataService {
         treeConfig: pluginData.treeConfig,
         module: this.createModuleLoader(pluginData.name)
       };
-
-      console.log('Plugin with module...', pluginWithModule);
 
       console.log(`Loaded plugin from server: ${pluginWithModule.displayName} (slug: ${slug})`);
       
