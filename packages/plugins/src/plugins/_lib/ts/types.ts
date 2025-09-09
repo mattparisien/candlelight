@@ -57,9 +57,6 @@ export type Plugin = {
   module?: () => Promise<any>;
 };
 
-// Legacy alias for backward compatibility
-export type PluginConfiguration = Plugin;
-
 /**
  * @summary UI types
  */

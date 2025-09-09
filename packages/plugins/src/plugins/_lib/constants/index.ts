@@ -1,5 +1,3 @@
-import { PluginConfiguration } from "../ts/types";
-
 export const COMPANY_NAME = "CandleLight";
 export const COMPANY_NAME_UPPER = COMPANY_NAME.toUpperCase();
 export const COMPANY_NAME_LOWER = COMPANY_NAME.toLocaleLowerCase();

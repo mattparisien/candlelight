@@ -7,6 +7,9 @@ dist/
 packages/*/dist/
 build/
 
+# Temporary files
+packages/plugins/.temp/
+
 # Environment variables
 .env
 .env.local
