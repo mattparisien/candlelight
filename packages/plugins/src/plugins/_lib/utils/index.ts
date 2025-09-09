@@ -110,8 +110,6 @@ export async function initializePlugin(pluginName: string): Promise<void> {
         console.log(`Initializing plugin: ${pluginName}`);
       }
 
-      console.log('the plugin name is ', pluginName);
-      console.log('before getting options');
       options = getPluginOptionsFromScript(script);
       plugin = await getPlugin(pluginName); // Get the plugin object from API
 
@@ -138,7 +136,6 @@ export async function initializePlugin(pluginName: string): Promise<void> {
         if (treeConfig) {
           if (isHTMLSelector(treeConfig)) {
             containerNodes = getContainersBySelector(treeConfig as HTMLSelector);
-            console.log('the container nodes are', containerNodes);
           } else {
             containerNodes = createTree(treeConfig as ElementTree);
           }

@@ -23,8 +23,8 @@ class PluginDataService {
       return 'http://localhost:3001';
     }
     
-    // In production, use the same domain without port (server should be on default HTTP/HTTPS ports)
-    return `${window.location.protocol}//${window.location.hostname}`;
+    // In production, use environment variable or fallback
+    return process.env.BASE_URL;
   }
 
   private nameToSlug(name: string): string {
