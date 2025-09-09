@@ -110,10 +110,12 @@ export async function initializePlugin(pluginName: string): Promise<void> {
         console.log(`Initializing plugin: ${pluginName}`);
       }
 
+      console.log('before getting options');
       options = getPluginOptionsFromScript(script);
       plugin = await getPlugin(pluginName); // Get the plugin object from API
 
 
+      console.log('the plugin is ', plugin);
       if (!plugin)
         throw new Error(
           `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`
