@@ -149,6 +149,41 @@ app.post('/admin/domains', async (req, res) => {
   }
 });
 
+// Admin endpoint for creating plugins
+app.post('/admin/plugins', async (req, res) => {
+  try {
+    const { 
+      name, 
+      slug, 
+      displayName, 
+      description, 
+      bundlePath, 
+      treeConfig, 
+      supportedPlatforms, 
+      squarespaceVersions,
+      isActive 
+    } = req.body;
+    
+    const plugin = new Plugin({
+      name,
+      slug,
+      displayName,
+      description,
+      bundlePath: bundlePath || `/plugins/${slug}/bundle.js`,
+      treeConfig: treeConfig || null,
+      supportedPlatforms: supportedPlatforms || ['desktop'],
+      squarespaceVersions: squarespaceVersions || ['7.1'],
+      isActive: isActive !== undefined ? isActive : true
+    });
+    
+    await plugin.save();
+    res.json({ success: true, plugin });
+  } catch (error) {
+    console.error('Error creating plugin:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
 app.get('/admin/domains', async (req, res) => {
   try {
     const domains = await AuthorizedDomain.find().sort({ createdAt: -1 });
