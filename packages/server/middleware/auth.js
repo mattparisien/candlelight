@@ -155,6 +155,7 @@ async function authenticateRequest(req, res, next) {
 
     // Check if domain has access to this specific plugin (skip for API routes)
     console.log('the plugon name is', pluginName);
+    console.log('the authorized domain plugins are', authorizedDomain.pluginsAllowed);
     if (pluginName && !authorizedDomain.pluginsAllowed.includes(pluginName)) {
       console.log('Domain does not have access to plugin:', domain, pluginName);
       return res.status(403).json({
