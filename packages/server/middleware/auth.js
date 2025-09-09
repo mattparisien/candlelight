@@ -45,30 +45,8 @@ function getPluginNameFromPath(path) {
     return null;
   }
 
-  // Convert folder names to plugin names
-  switch (pluginFolder.toLowerCase()) {
-    case 'mouse-follower':
-    case 'mousefollower':
-      return 'MouseFollower';
-    case 'layered-sections':
-    case 'layeredsections':
-      return 'LayeredSections';
-    case 'magnetic-button':
-    case 'magneticbutton':
-      return 'MagneticButton';
-    case 'image-trailer':
-    case 'imagetrailer':
-      return 'ImageTrailer';
-    case 'blob-revealer':
-    case 'blobrevealer':
-      return 'BlobRevealer';
-    default:
-      // Try to convert kebab-case to PascalCase
-      return pluginFolder
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join('');
-  }
+  // Return the folder name as slug (kebab-case)
+  return pluginFolder.toLowerCase();
 }
 
 
@@ -121,13 +99,13 @@ async function authenticateRequest(req, res, next) {
       });
     }
 
-    // Get plugin name from request path (skip for API routes)
-    let pluginName = null;
+    // Get plugin slug from request path (skip for API routes)
+    let pluginSlug = null;
     if (!requestPath.startsWith('/api/')) {
-      pluginName = getPluginNameFromPath(requestPath);
-      console.log('the plugin name', pluginName);
-      if (!pluginName) {
-        console.log('Could not determine plugin name from path:', requestPath);
+      pluginSlug = getPluginNameFromPath(requestPath);
+      console.log('the plugin slug', pluginSlug);
+      if (!pluginSlug) {
+        console.log('Could not determine plugin slug from path:', requestPath);
         return res.status(403).json({
           error: 'Access denied: Invalid plugin request'
         });
@@ -143,7 +121,7 @@ async function authenticateRequest(req, res, next) {
     const authorizedDomain = await AuthorizedDomain.findOne({
       websiteUrl: domain,
       status: 'active'
-    });
+    }).populate('pluginsAllowed');
 
     if (!authorizedDomain) {
       console.log('Domain not found or not active:', domain);
@@ -154,14 +132,15 @@ async function authenticateRequest(req, res, next) {
     }
 
     // Check if domain has access to this specific plugin (skip for API routes)
-    console.log('the plugon name is', pluginName);
-    console.log('the authorized domain plugins are', authorizedDomain.pluginsAllowed);
-    if (pluginName && !authorizedDomain.pluginsAllowed.includes(pluginName)) {
-      console.log('Domain does not have access to plugin:', domain, pluginName);
+    console.log('the plugin slug is', pluginSlug);
+    console.log('the authorized domain plugin slugs are', authorizedDomain.pluginsAllowed.map(p => p.slug));
+    const allowedPluginSlugs = authorizedDomain.pluginsAllowed.map(p => p.slug);
+    if (pluginSlug && !allowedPluginSlugs.includes(pluginSlug)) {
+      console.log('Domain does not have access to plugin:', domain, pluginSlug);
       return res.status(403).json({
         error: 'Access denied: Plugin not authorized for this domain',
         domain: domain,
-        plugin: pluginName
+        plugin: pluginSlug
       });
     }
 
@@ -174,7 +153,7 @@ async function authenticateRequest(req, res, next) {
       });
     }
 
-    console.log('Access granted:', domain, pluginName);
+    console.log('Access granted:', domain, pluginSlug);
     
     // Set the authorized domain on the request for API endpoints
     req.authorizedDomain = authorizedDomain;
