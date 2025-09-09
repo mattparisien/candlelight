@@ -95,7 +95,7 @@ async function addDomain() {
         return;
       }
 
-      existing.pluginsAllowed.push(...newIds.map(id => mongoose.Types.ObjectId(id)));
+      existing.pluginsAllowed.push(...newIds.map(id => new mongoose.Types.ObjectId(id)));
       await existing.save();
 
       // Reload to show updated info
