@@ -24,7 +24,14 @@ class PluginDataService {
     }
     
     // In production, use environment variable or fallback
-    return process.env.BASE_URL;
+    console.log('Environment variables:', { 
+      VITE_PLUGIN_SERVER_URL: process.env.VITE_PLUGIN_SERVER_URL,
+      PLUGIN_SERVER_URL: process.env.PLUGIN_SERVER_URL 
+    });
+    
+    const baseUrl = process.env.VITE_PLUGIN_SERVER_URL || process.env.PLUGIN_SERVER_URL || 'https://sqsp-pluginsserver-production.up.railway.app';
+    console.log('Using base URL:', baseUrl);
+    return baseUrl;
   }
 
   private nameToSlug(name: string): string {
