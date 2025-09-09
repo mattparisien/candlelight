@@ -121,6 +121,8 @@ class PluginDataService {
         module: this.createModuleLoader(pluginData.name)
       };
 
+      console.log('Plugin with module...', pluginWithModule);
+
       console.log(`Loaded plugin from server: ${pluginWithModule.displayName} (slug: ${slug})`);
       
       return pluginWithModule;

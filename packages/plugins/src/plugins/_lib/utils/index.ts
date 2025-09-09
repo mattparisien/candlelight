@@ -134,6 +134,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
         if (treeConfig) {
           if (isHTMLSelector(treeConfig)) {
             containerNodes = getContainersBySelector(treeConfig as HTMLSelector);
+            console.log('the container nodes are', containerNodes);
           } else {
             containerNodes = createTree(treeConfig as ElementTree);
           }
