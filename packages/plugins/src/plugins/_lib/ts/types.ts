@@ -44,14 +44,21 @@ export type PluginRootElement = HTMLSelector | ElementTree;
 export type PluginOptions<T> = T & {
   [K in keyof T as `_${string & K}`]?: T[K];
 };
-export type PluginConfiguration = {
+
+export type Plugin = {
+  _id?: string;
   name: string;
+  slug: string;
   displayName: string;
   description?: string;
-  tree?: PluginRootElement;
+  bundlePath?: string;
+  treeConfig?: PluginRootElement;
   isActive: boolean;
-  module: () => Promise<any>;
+  module?: () => Promise<any>;
 };
+
+// Legacy alias for backward compatibility
+export type PluginConfiguration = Plugin;
 
 /**
  * @summary UI types

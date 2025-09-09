@@ -1,9 +1,12 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
-const { authenticateRequest, AuthorizedDomain } = require('./middleware/auth');
+const { authenticateRequest } = require('./middleware/auth');
+const AuthorizedDomain = require('./models/AuthorizedDomain');
+const Plugin = require('./models/Plugin');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -64,6 +67,57 @@ mongoose.connect(MONGODB_URI)
     console.error('MongoDB connection error:', error);
     process.exit(1);
   });
+
+// API endpoint to get a single plugin by slug
+app.get('/api/plugins/:slug', authenticateRequest, async (req, res) => {
+  try {
+    const domain = req.authorizedDomain;
+    const { slug } = req.params;
+    
+    if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {
+      return res.status(404).json({ error: 'Plugin not found or not authorized for this domain' });
+    }
+
+    // Populate plugins and find the one with matching slug
+    const domainWithPlugins = await AuthorizedDomain.findById(domain._id)
+      .populate('pluginsAllowed', 'name slug displayName description bundlePath treeConfig isActive')
+      .exec();
+    
+    const plugin = domainWithPlugins.pluginsAllowed.find(p => p.slug === slug && p.isActive);
+    
+    if (!plugin) {
+      return res.status(404).json({ error: 'Plugin not found or not authorized for this domain' });
+    }
+    
+    res.json(plugin);
+  } catch (error) {
+    console.error('Error fetching plugin:', error);
+    res.status(500).json({ error: 'Failed to fetch plugin' });
+  }
+});
+
+// API endpoint to get plugins for a domain
+app.get('/api/plugins', authenticateRequest, async (req, res) => {
+  try {
+    const domain = req.authorizedDomain;
+    
+    if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {
+      return res.json([]);
+    }
+
+    // Populate plugins with their details
+    const domainWithPlugins = await AuthorizedDomain.findById(domain._id)
+      .populate('pluginsAllowed', 'name slug displayName description bundlePath treeConfig isActive')
+      .exec();
+    
+    const allowedPlugins = domainWithPlugins.pluginsAllowed.filter(plugin => plugin.isActive);
+    
+    res.json(allowedPlugins);
+  } catch (error) {
+    console.error('Error fetching plugins:', error);
+    res.status(500).json({ error: 'Failed to fetch plugins' });
+  }
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {

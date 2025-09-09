@@ -1,6 +1,6 @@
 import { HTML_SELECTOR_MAP, SQSP_ENV_SELECTOR_MAP } from "../config/domMappings";
-import { pluginConfiguration } from "../config/plugins";
-import { ElementTree, HTMLSelector, PluginConfiguration } from "../ts/types";
+import PluginDataService from "../services/PluginDataService";
+import { ElementTree, HTMLSelector, Plugin } from "../ts/types";
 import DomUtils from "./DomUtils";
 
 const encodeHTML = (str: string): string => {
@@ -25,8 +25,9 @@ const getPluginOptionsFromScript = (script: HTMLOrSVGScriptElement) => {
   return options;
 };
 
-function getPluginConfig(pluginName: string): PluginConfiguration {
-  return pluginConfiguration.find((config) => config.name.trim() === pluginName.trim());
+async function getPlugin(pluginName: string): Promise<Plugin | undefined> {
+  console.log('the plugin name is ', pluginName);
+  return await PluginDataService.fetchPluginByName(pluginName);
 }
 
 function getContainersBySelector(
@@ -92,7 +93,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
 
   window.addEventListener("load", async () => {
     try {
-      let options, module, Class, config: PluginConfiguration, containerNodes, isDev;
+      let options, module, Class, plugin: Plugin, containerNodes, isDev;
 
       if (!script) {
         throw new Error(
@@ -107,33 +108,34 @@ export async function initializePlugin(pluginName: string): Promise<void> {
         return;
       } else {
         console.log(`Initializing plugin: ${pluginName}`);
-        
       }
 
       options = getPluginOptionsFromScript(script);
-      config = await getPluginConfig(pluginName); // Get the configuration object
+      plugin = await getPlugin(pluginName); // Get the plugin object from API
 
 
-      if (!config)
+      if (!plugin)
         throw new Error(
-          `System configuration object not found for plugin ${pluginName}`
+          `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`
         );
 
-      if (config.isActive) {
-        module = await config.module(); // Load the module from configuration
+      if (plugin.isActive && plugin.module) {
+        module = await plugin.module(); // Load the module from plugin configuration
         Class = await module.default; // Get the module's default exported value (the class)
 
         if (!Class)
           throw new Error(
-            `Error loading class or config. Plugin ${pluginName} not found.`
+            `Error loading class for plugin ${pluginName}. Module not found.`
           );
 
-        if (config.tree) {
+        // Use treeConfig from the API response, fallback to HTML_SELECTOR_MAP
+        const treeConfig = plugin.treeConfig;
 
-          if (isHTMLSelector(config.tree)) {
-            containerNodes = getContainersBySelector(config.tree as HTMLSelector);
+        if (treeConfig) {
+          if (isHTMLSelector(treeConfig)) {
+            containerNodes = getContainersBySelector(treeConfig as HTMLSelector);
           } else {
-            containerNodes = createTree(config.tree as ElementTree);
+            containerNodes = createTree(treeConfig as ElementTree);
           }
 
           if (
@@ -153,6 +155,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
             instance.init();
           }
         } else {
+          // Fallback to old HTML_SELECTOR_MAP behavior
           containerNodes = Array.from(document.querySelectorAll(HTML_SELECTOR_MAP.get(pluginName)))
           containerNodes.forEach(container => {
             const instance = new Class(container, options);
@@ -162,7 +165,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
 
       }
     } catch (err) {
-      console.error(err);
+      console.error(`Plugin initialization error for ${pluginName}:`, err);
     }
   });
 }

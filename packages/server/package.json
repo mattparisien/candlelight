@@ -10,7 +10,10 @@
     "deploy:railway": "railway up",
     "deploy:render": "echo 'Push to GitHub - Render will auto-deploy'",
     "domains:add": "node scripts/manage-domains.js add",
-    "domains:list": "node scripts/manage-domains.js list"
+    "domains:list": "node scripts/manage-domains.js list",
+    "domains:migrate": "node scripts/migrate-domains.js",
+    "domains:seed": "node scripts/seed-domains.js",
+    "plugins:seed": "node scripts/seed-plugins.js"
   },
   "keywords": ["authentication", "plugins", "squarespace"],
   "author": "",

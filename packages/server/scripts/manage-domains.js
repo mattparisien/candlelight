@@ -2,7 +2,9 @@
 
 const mongoose = require('mongoose');
 const readline = require('readline');
-const { AuthorizedDomain } = require('../middleware/auth');
+const AuthorizedDomain = require('../models/AuthorizedDomain');
+const Setting = require('../models/Setting');
+const Plugin = require('../models/Plugin');
 require('dotenv').config();
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/plugin-auth';
@@ -22,54 +24,127 @@ async function addDomain() {
   try {
     await mongoose.connect(MONGODB_URI);
     console.log('🔗 Connected to MongoDB\n');
+    
+    // Ensure collections exist (creates them if they don't exist)
+    await AuthorizedDomain.createCollection().catch(() => {}); // Ignore error if collection exists
+    await Setting.createCollection().catch(() => {}); // Ignore error if collection exists
+    await Plugin.createCollection().catch(() => {}); // Ignore error if collection exists
+    
     console.log('🔐 Add / Update Authorized Domain\n');
 
     const rawWebsiteUrl = await askQuestion('Enter website URL (e.g., client-site.squarespace.com): ');
     const normalizedUrl = rawWebsiteUrl.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
 
     // Check if domain already exists
-    let existing = await AuthorizedDomain.findOne({ websiteUrl: normalizedUrl });
+    let existing = await AuthorizedDomain.findOne({ websiteUrl: normalizedUrl }).populate('pluginsAllowed');
 
     if (existing) {
+      const currentPluginNames = existing.pluginsAllowed.map(p => p.displayName).join(', ') || '(none)';
       console.log(`\nℹ️  Domain already exists: ${existing.websiteUrl}`);
-      console.log(`   Current plugins: ${existing.pluginsAllowed.length ? existing.pluginsAllowed.join(', ') : '(none)'}`);
+      console.log(`   Current plugins: ${currentPluginNames}`);
 
-      const pluginsInput = await askQuestion('Enter plugins to ADD (comma-separated) or "all" for all (leave blank to cancel): ');
+      // Show available plugins
+      const availablePlugins = await Plugin.find({ isActive: true }).sort({ displayName: 1 });
+      console.log('\n📋 Available plugins:');
+      availablePlugins.forEach((plugin, index) => {
+        console.log(`   ${index + 1}. ${plugin.displayName} (${plugin.name})`);
+      });
+
+      const pluginsInput = await askQuestion('\nEnter plugins to ADD (comma-separated names/numbers) or "all" for all (leave blank to cancel): ');
       if (!pluginsInput.trim()) {
         console.log('🚫 No plugins specified. Aborting.');
         return;
       }
 
-      let pluginsToAdd;
+      let pluginsToAdd = [];
       if (pluginsInput.toLowerCase().trim() === 'all') {
-        pluginsToAdd = ['LayeredSections', 'MagneticButton', 'MouseFollower', 'ImageTrailer', 'BlobRevealer'];
+        pluginsToAdd = availablePlugins.map(p => p._id);
       } else {
-        pluginsToAdd = pluginsInput.split(',').map(p => p.trim()).filter(Boolean);
+        const inputs = pluginsInput.split(',').map(p => p.trim()).filter(Boolean);
+        for (const input of inputs) {
+          // Check if it's a number (index)
+          const index = parseInt(input) - 1;
+          if (!isNaN(index) && index >= 0 && index < availablePlugins.length) {
+            pluginsToAdd.push(availablePlugins[index]._id);
+          } else {
+            // Try to find by name
+            const plugin = availablePlugins.find(p => 
+              p.name.toLowerCase() === input.toLowerCase() || 
+              p.displayName.toLowerCase() === input.toLowerCase()
+            );
+            if (plugin) {
+              pluginsToAdd.push(plugin._id);
+            } else {
+              console.log(`   ⚠️  Plugin "${input}" not found, skipping...`);
+            }
+          }
+        }
       }
 
-      const merged = Array.from(new Set([...(existing.pluginsAllowed || []), ...pluginsToAdd]));
-      existing.pluginsAllowed = merged;
+      if (pluginsToAdd.length === 0) {
+        console.log('🚫 No valid plugins specified. Aborting.');
+        return;
+      }
+
+      // Merge with existing (avoid duplicates)
+      const currentIds = existing.pluginsAllowed.map(p => p._id.toString());
+      const newIds = pluginsToAdd.map(id => id.toString()).filter(id => !currentIds.includes(id));
+      
+      if (newIds.length === 0) {
+        console.log('ℹ️  All specified plugins are already assigned to this domain.');
+        return;
+      }
+
+      existing.pluginsAllowed.push(...newIds.map(id => mongoose.Types.ObjectId(id)));
       await existing.save();
 
+      // Reload to show updated info
+      const updated = await AuthorizedDomain.findById(existing._id).populate('pluginsAllowed');
       console.log('\n✅ Domain updated successfully!');
       console.log('📋 Updated Domain Details:');
-      console.log(`   🌐 Website: ${existing.websiteUrl}`);
-      console.log(`   🎨 Plugins: ${existing.pluginsAllowed.join(', ')}`);
-      console.log(`   📧 Customer: ${existing.customerEmail || 'N/A'}`);
-      console.log(`   🆔 ID: ${existing._id}`);
+      console.log(`   🌐 Website: ${updated.websiteUrl}`);
+      console.log(`   🎨 Plugins: ${updated.pluginsAllowed.map(p => p.displayName).join(', ')}`);
+      console.log(`   📧 Customer: ${updated.customerEmail || 'N/A'}`);
+      console.log(`   🆔 ID: ${updated._id}`);
       return;
     }
 
     // New domain flow
     const customerEmail = await askQuestion('Enter customer email: ');
-    const pluginsInput = await askQuestion('Enter allowed plugins (comma-separated) or "all" for all plugins: ');
+    
+    // Show available plugins
+    const availablePlugins = await Plugin.find({ isActive: true }).sort({ displayName: 1 });
+    console.log('\n📋 Available plugins:');
+    availablePlugins.forEach((plugin, index) => {
+      console.log(`   ${index + 1}. ${plugin.displayName} (${plugin.name})`);
+    });
+    
+    const pluginsInput = await askQuestion('\nEnter allowed plugins (comma-separated names/numbers) or "all" for all plugins: ');
     const notes = await askQuestion('Enter notes (optional): ');
 
-    let pluginsAllowed;
+    let pluginsAllowed = [];
     if (pluginsInput.toLowerCase().trim() === 'all') {
-      pluginsAllowed = ['LayeredSections', 'MagneticButton', 'MouseFollower', 'ImageTrailer', 'BlobRevealer'];
+      pluginsAllowed = availablePlugins.map(p => p._id);
     } else {
-      pluginsAllowed = pluginsInput.split(',').map(p => p.trim()).filter(Boolean);
+      const inputs = pluginsInput.split(',').map(p => p.trim()).filter(Boolean);
+      for (const input of inputs) {
+        // Check if it's a number (index)
+        const index = parseInt(input) - 1;
+        if (!isNaN(index) && index >= 0 && index < availablePlugins.length) {
+          pluginsAllowed.push(availablePlugins[index]._id);
+        } else {
+          // Try to find by name
+          const plugin = availablePlugins.find(p => 
+            p.name.toLowerCase() === input.toLowerCase() || 
+            p.displayName.toLowerCase() === input.toLowerCase()
+          );
+          if (plugin) {
+            pluginsAllowed.push(plugin._id);
+          } else {
+            console.log(`   ⚠️  Plugin "${input}" not found, skipping...`);
+          }
+        }
+      }
     }
 
     const domain = new AuthorizedDomain({
@@ -81,12 +156,15 @@ async function addDomain() {
     });
 
     await domain.save();
+    
+    // Reload to show plugin names
+    const created = await AuthorizedDomain.findById(domain._id).populate('pluginsAllowed');
     console.log('\n✅ Domain added successfully!');
     console.log('📋 Domain Details:');
-    console.log(`   🌐 Website: ${domain.websiteUrl}`);
-    console.log(`   🎨 Plugins: ${domain.pluginsAllowed.join(', ')}`);
-    console.log(`   📧 Customer: ${domain.customerEmail}`);
-    console.log(`   🆔 ID: ${domain._id}`);
+    console.log(`   🌐 Website: ${created.websiteUrl}`);
+    console.log(`   🎨 Plugins: ${created.pluginsAllowed.map(p => p.displayName).join(', ')}`);
+    console.log(`   📧 Customer: ${created.customerEmail}`);
+    console.log(`   🆔 ID: ${created._id}`);
 
   } catch (error) {
     console.error('❌ Error adding/updating domain:', error.message);
@@ -102,7 +180,12 @@ async function listDomains() {
     await mongoose.connect(MONGODB_URI);
     console.log('🔗 Connected to MongoDB\n');
     
-    const domains = await AuthorizedDomain.find().sort({ createdAt: -1 });
+    // Ensure collections exist (creates them if they don't exist)
+    await AuthorizedDomain.createCollection().catch(() => {}); // Ignore error if collection exists
+    await Setting.createCollection().catch(() => {}); // Ignore error if collection exists
+    await Plugin.createCollection().catch(() => {}); // Ignore error if collection exists
+    
+    const domains = await AuthorizedDomain.find().populate('pluginsAllowed').sort({ createdAt: -1 });
     
     console.log('📋 Authorized Domains:\n');
     
@@ -112,7 +195,13 @@ async function listDomains() {
       domains.forEach((domain, index) => {
         console.log(`${index + 1}. 🌐 ${domain.websiteUrl}`);
         console.log(`   📊 Status: ${domain.status}`);
-        console.log(`   🎨 Plugins: ${domain.pluginsAllowed.join(', ')}`);
+        
+        if (domain.pluginsAllowed && domain.pluginsAllowed.length > 0) {
+          console.log(`   🎨 Plugins: ${domain.pluginsAllowed.map(p => p.displayName || p.name).join(', ')}`);
+        } else {
+          console.log(`   🎨 Plugins: (none - please update to assign plugins)`);
+        }
+        
         console.log(`   📧 Email: ${domain.customerEmail || 'N/A'}`);
         console.log(`   📅 Created: ${domain.createdAt.toLocaleDateString()}`);
         if (domain.expiresAt) {

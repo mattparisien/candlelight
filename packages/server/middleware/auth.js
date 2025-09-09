@@ -1,37 +1,5 @@
 const mongoose = require('mongoose');
-
-// MongoDB Schema for authorized domains
-const authorizedDomainSchema = new mongoose.Schema({
-  websiteUrl: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true
-  },
-  pluginsAllowed: [{
-    type: String,
-    enum: ['MouseFollower', 'LayeredSections', 'MagneticButton', 'ImageTrailer', 'BlobRevealer']
-  }],
-  status: {
-    type: String,
-    enum: ['active', 'expired', 'suspended'],
-    default: 'active'
-  },
-  purchaseDate: {
-    type: Date,
-    default: Date.now
-  },
-  expiresAt: {
-    type: Date,
-    default: null // null means no expiration
-  },
-  customerEmail: String,
-  notes: String
-}, {
-  timestamps: true
-});
-
-const AuthorizedDomain = mongoose.model('AuthorizedDomain', authorizedDomainSchema);
+const AuthorizedDomain = require('../models/AuthorizedDomain');
 
 // Helper function to extract and normalize domain from URL
 function extractDomain(url) {
@@ -132,6 +100,13 @@ async function authenticateRequest(req, res, next) {
 
       if (isLocalhost) {
         console.log('Development: allowing localhost request');
+        // Find localhost domain for API endpoints
+        if (requestPath.startsWith('/api/')) {
+          const localhostDomain = await AuthorizedDomain.findOne({ websiteUrl: 'localhost' });
+          if (localhostDomain) {
+            req.authorizedDomain = localhostDomain;
+          }
+        }
         return next();
       }
     }
@@ -146,13 +121,17 @@ async function authenticateRequest(req, res, next) {
       });
     }
 
-    // Get plugin name from request path
-    const pluginName = getPluginNameFromPath(requestPath);
-    if (!pluginName) {
-      console.log('Could not determine plugin name from path:', requestPath);
-      return res.status(403).json({
-        error: 'Access denied: Invalid plugin request'
-      });
+    // Get plugin name from request path (skip for API routes)
+    let pluginName = null;
+    if (!requestPath.startsWith('/api/')) {
+      pluginName = getPluginNameFromPath(requestPath);
+      console.log('the plugin name', pluginName);
+      if (!pluginName) {
+        console.log('Could not determine plugin name from path:', requestPath);
+        return res.status(403).json({
+          error: 'Access denied: Invalid plugin request'
+        });
+      }
     }
 
     // Check database for authorized domain
@@ -174,8 +153,8 @@ async function authenticateRequest(req, res, next) {
       });
     }
 
-    // Check if domain has access to this specific plugin
-    if (!authorizedDomain.pluginsAllowed.includes(pluginName)) {
+    // Check if domain has access to this specific plugin (skip for API routes)
+    if (pluginName && !authorizedDomain.pluginsAllowed.includes(pluginName)) {
       console.log('Domain does not have access to plugin:', domain, pluginName);
       return res.status(403).json({
         error: 'Access denied: Plugin not authorized for this domain',
@@ -194,6 +173,10 @@ async function authenticateRequest(req, res, next) {
     }
 
     console.log('Access granted:', domain, pluginName);
+    
+    // Set the authorized domain on the request for API endpoints
+    req.authorizedDomain = authorizedDomain;
+    
     next();
 
   } catch (error) {
