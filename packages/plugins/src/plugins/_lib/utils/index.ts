@@ -110,8 +110,11 @@ export async function initializePlugin(pluginName: string): Promise<void> {
         console.log(`Initializing plugin: ${pluginName}`);
       }
 
+      console.log('the plugin name is ', pluginName);
+      console.log('before getting options');
       options = getPluginOptionsFromScript(script);
       plugin = await getPlugin(pluginName); // Get the plugin object from API
+
 
 
       if (!plugin)
