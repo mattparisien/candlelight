@@ -103,7 +103,7 @@ module.exports = {
     }),
     new EnvironmentPlugin({
       BASE_URL: process.env.NODE_ENV === 'production'
-        ? 'sqsp-pluginsserver-production.up.railway.app' // Default production URL
+        ? 'https://sqsp-pluginsserver-production.up.railway.app' // Default production URL
         : 'http://localhost:3000'        // Default development URL
     }), // Environment variables with defaults
   ],
