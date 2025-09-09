@@ -102,7 +102,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
       }
 
       isDev = document.querySelector(SQSP_ENV_SELECTOR_MAP.get("DEV"));
-      
+
       if (isDev) {
         console.log("Development environment detected, skipping plugin load.");
         return;
@@ -119,6 +119,8 @@ export async function initializePlugin(pluginName: string): Promise<void> {
           `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`
         );
 
+        console.log('the plyugin is', plugin);
+
       if (plugin.isActive && plugin.module) {
         module = await plugin.module(); // Load the module from plugin configuration
         Class = await module.default; // Get the module's default exported value (the class)
@@ -130,7 +132,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
 
         // Use treeConfig from the API response, fallback to HTML_SELECTOR_MAP
         const treeConfig = plugin.treeConfig;
-
+        console.log('the three config is', treeConfig);
         if (treeConfig) {
           if (isHTMLSelector(treeConfig)) {
             containerNodes = getContainersBySelector(treeConfig as HTMLSelector);
