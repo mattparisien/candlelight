@@ -13,9 +13,14 @@
     "domains:list": "node scripts/manage-domains.js list",
     "domains:migrate": "node scripts/migrate-domains.js",
     "domains:seed": "node scripts/seed-domains.js",
-    "plugins:seed": "node scripts/seed-plugins.js"
+    "plugins:seed": "node scripts/seed-plugins.js",
+    "plugins:add-passwords": "node scripts/add-passwords-to-plugins.js"
   },
-  "keywords": ["authentication", "plugins", "squarespace"],
+  "keywords": [
+    "authentication",
+    "plugins",
+    "squarespace"
+  ],
   "author": "",
   "license": "ISC",
   "description": "Authentication server for Squarespace plugins",
@@ -24,7 +29,8 @@
     "dotenv": "^16.4.5",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
-    "mongoose": "^8.18.0"
+    "mongoose": "^8.18.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"

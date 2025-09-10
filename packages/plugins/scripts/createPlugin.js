@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const { v4: uuidv4 } = require('uuid');
 
 // Use dynamic import for node-fetch
 async function getFetch() {
@@ -146,6 +147,16 @@ function createPluginFiles(pluginName, pluginDir) {
   return { pascalCase, kebabCase };
 }
 
+// Function to generate a secure UUID-based password
+function generatePluginPassword() {
+  // Generate two UUIDs and concatenate them for extra security
+  const uuid1 = uuidv4().replace(/-/g, ''); // Remove hyphens
+  const uuid2 = uuidv4().replace(/-/g, ''); // Remove hyphens
+  
+  // Combine and take first 28 characters (less than 30)
+  return (uuid1 + uuid2).substring(0, 28);
+}
+
 // Function to register plugin in MongoDB
 async function registerPluginInMongoDB(pluginData) {
   try {
@@ -263,6 +274,9 @@ async function createPlugin() {
     
     const formats = createPluginFiles(pluginName, pluginDir);
     
+    // Generate a secure UUID-based password for the plugin
+    const pluginPassword = generatePluginPassword();
+    
     // Prepare MongoDB data
     const pluginData = {
       name: pascalCase,
@@ -271,6 +285,7 @@ async function createPlugin() {
       description: description.trim() || `${pluginName.trim()} plugin`,
       bundlePath: `/plugins/${kebabCase}/bundle.js`,
       treeConfig,
+      password: pluginPassword,
       supportedPlatforms,
       squarespaceVersions: ['7.1'],
       isActive: true
@@ -278,9 +293,11 @@ async function createPlugin() {
     
     // Register in MongoDB
     console.log('\n📡 Registering plugin in MongoDB...');
-    await registerPluginInMongoDB(pluginData);
+    const createdPlugin = await registerPluginInMongoDB(pluginData);
     
     console.log(`\n✅ Plugin "${pascalCase}" created successfully!`);
+    console.log(`🔐 Plugin Password: ${pluginPassword}`);
+    console.log('   ⚠️  Save this password securely - it cannot be recovered!');
     console.log('\n📋 Next steps:');
     console.log(`   1. Edit ${path.join(pluginDir, 'model.ts')} to implement your plugin logic`);
     console.log(`   2. Customize ${path.join(pluginDir, 'assets/styles/main.scss')} for styling`);

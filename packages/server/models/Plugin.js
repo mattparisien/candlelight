@@ -38,6 +38,12 @@ const pluginSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed, // Can store either string selector or object config
     required: false
   },
+  password: {
+    type: String,
+    required: true,
+    minlength: 16,
+    maxlength: 32
+  },
   supportedPlatforms: [{
     type: String,
     enum: ['desktop', 'mobile', 'tablet'],

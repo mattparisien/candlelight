@@ -53,6 +53,7 @@ export type Plugin = {
   description?: string;
   bundlePath?: string;
   treeConfig?: PluginRootElement;
+  password?: string;
   isActive: boolean;
   supportedPlatforms?: ('mobile' | 'tablet' | 'desktop')[];
   module?: () => Promise<any>;
