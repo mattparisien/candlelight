@@ -1,5 +1,6 @@
 import { HTML_SELECTOR_MAP, SQSP_ENV_SELECTOR_MAP } from "../config/domMappings";
 import PluginDataService from "../services/PluginDataService";
+import DeviceService from "../services/DeviceService";
 import { ElementTree, HTMLSelector, Plugin } from "../ts/types";
 import DomUtils from "./DomUtils";
 
@@ -113,12 +114,23 @@ export async function initializePlugin(pluginName: string): Promise<void> {
       options = getPluginOptionsFromScript(script);
       plugin = await getPlugin(pluginName); // Get the plugin object from API
 
-
-
       if (!plugin)
         throw new Error(
           `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`
         );
+
+      // Check device compatibility
+      if (plugin.supportedPlatforms && plugin.supportedPlatforms.length > 0) {
+        const deviceType = DeviceService.getDeviceType();
+        const isDeviceSupported = plugin.supportedPlatforms.includes(deviceType);
+        
+        if (!isDeviceSupported) {
+          console.log(`Plugin ${pluginName} is not supported on ${deviceType}. Supported platforms: ${plugin.supportedPlatforms.join(', ')}`);
+          return;
+        }
+        
+        console.log(`Device compatibility check passed for ${pluginName} on ${deviceType}`);
+      }
 
 
       if (plugin.isActive && plugin.module) {
@@ -171,3 +183,6 @@ export async function initializePlugin(pluginName: string): Promise<void> {
     }
   });
 }
+
+// Export services for use in plugins
+export { default as DeviceService } from "../services/DeviceService";

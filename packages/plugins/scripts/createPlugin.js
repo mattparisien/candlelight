@@ -201,6 +201,11 @@ async function createPlugin() {
       rl.question('🌳 Default tree config? (1=body, 2=button, 3=section, 4=none): ', resolve);
     });
 
+    // Get supported platforms
+    const platformsInput = await new Promise((resolve) => {
+      rl.question('📱 Supported platforms? (1=all, 2=desktop only, 3=mobile+tablet, 4=custom): ', resolve);
+    });
+
     const { pascalCase, kebabCase } = formatPluginName(pluginName);
     
     // Determine tree config
@@ -217,6 +222,31 @@ async function createPlugin() {
         break;
       default:
         treeConfig = null;
+    }
+
+    // Determine supported platforms
+    let supportedPlatforms = ['desktop']; // default
+    switch(platformsInput) {
+      case '1':
+        supportedPlatforms = ['desktop', 'mobile', 'tablet'];
+        break;
+      case '2':
+        supportedPlatforms = ['desktop'];
+        break;
+      case '3':
+        supportedPlatforms = ['mobile', 'tablet'];
+        break;
+      case '4':
+        const customPlatforms = await new Promise((resolve) => {
+          rl.question('   Enter platforms (comma-separated: desktop,mobile,tablet): ', resolve);
+        });
+        supportedPlatforms = customPlatforms.split(',').map(p => p.trim()).filter(p => ['desktop', 'mobile', 'tablet'].includes(p));
+        if (supportedPlatforms.length === 0) {
+          supportedPlatforms = ['desktop']; // fallback
+        }
+        break;
+      default:
+        supportedPlatforms = ['desktop'];
     }
     
     console.log(`\n🚀 Creating plugin: ${pascalCase}`);
@@ -241,7 +271,7 @@ async function createPlugin() {
       description: description.trim() || `${pluginName.trim()} plugin`,
       bundlePath: `/plugins/${kebabCase}/bundle.js`,
       treeConfig,
-      supportedPlatforms: ['desktop'],
+      supportedPlatforms,
       squarespaceVersions: ['7.1'],
       isActive: true
     };
