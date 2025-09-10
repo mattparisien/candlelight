@@ -1,0 +1,70 @@
+<style>
+    .sqs-block.code-block.sqs-block-code .source-code {
+        font-size: 12px !important;
+        line-height: 1.4;
+        color: #5a5a5a;
+        margin-bottom: 0px !important;
+    }
+
+    .sqs-block.code-block.sqs-block-code .sqs-block-content {
+        position: relative;
+    }
+
+    .sqs-block-code {
+        padding: 1rem;
+        background-color: #f4f4f4;
+        border-radius: 0.4rem;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding-top: 17px !important;
+    }
+</style>
+
+<script>
+    const createCopyToClipboardButton = (label) => {
+        const button = document.createElement("button");
+        button.classList.add("button-copy");
+        button.innerText = label || "Copy to Clipboard";
+        button._resetTimeout = null; // store timeout id
+        return button;
+    };
+
+    const addCopyToClipboardButtons = () => {
+        const nodes = document.querySelectorAll(
+            ".sqs-block.code-block.sqs-block-code .sqs-block-content"
+        );
+
+        nodes.forEach((node) => {
+            const textNode = node.querySelector(".source-code");
+            const text = textNode.textContent;
+
+            const button = createCopyToClipboardButton("Copy Code");
+
+            button.addEventListener("click", () => {
+                navigator.clipboard
+                    .writeText(text)
+                    .then(() => {
+                        const prevText = "Copy Code";
+
+                        // Clear any existing timeout before starting a new one
+                        if (button._resetTimeout) {
+                            clearTimeout(button._resetTimeout);
+                        }
+
+                        button.innerText = "Code Copied!";
+
+                        button._resetTimeout = setTimeout(() => {
+                            button.innerText = prevText;
+                            button._resetTimeout = null;
+                        }, 1000);
+                    })
+                    .catch((err) => {
+                        console.error("Failed to copy: ", err);
+                    });
+            });
+
+            node.appendChild(button);
+        });
+    };
+
+    window.addEventListener("load", addCopyToClipboardButtons);
+</script>
