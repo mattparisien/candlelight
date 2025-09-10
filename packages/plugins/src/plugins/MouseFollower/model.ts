@@ -11,6 +11,7 @@ interface IMouseFollowerOptions {
   color: string;
   radius: number;
   speed: number;
+  opacity: number;
 }
 
 interface IMouseFollower {
@@ -33,6 +34,7 @@ class MouseFollower
   private _color: string = "#FBC9C2";
   private _radius: number = 20;
   private _speed: number = 0.1;
+  private _opacity: number = 1.0;
   private _fadeSpeed: number = 0.3; // Static fade speed
 
   private _colorProxy: string = this._color;
@@ -47,12 +49,14 @@ class MouseFollower
     color: this._color,
     radius: this._radius,
     speed: this._speed,
+    opacity: this._opacity,
   }
 
   allowedOptions: (keyof IMouseFollowerOptions)[] = [
     "color",
     "radius",
     "speed",
+    "opacity",
   ];
 
   constructor(container: any, options: PluginOptions<IMouseFollowerOptions>) {
@@ -93,6 +97,11 @@ class MouseFollower
     if (options.color !== undefined) {
       this._color = options.color;
     }
+    if (options.opacity !== undefined) {
+      this._opacity = typeof options.opacity === 'string' ? parseFloat(options.opacity) : options.opacity;
+      // Clamp opacity between 0 and 1
+      this._opacity = Math.max(0, Math.min(1, this._opacity));
+    }
 
     return this.options;
   }
@@ -114,6 +123,9 @@ class MouseFollower
     const ctx = this._canvasService.context as CanvasRenderingContext2D;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+    // Set opacity
+    ctx.globalAlpha = this._opacity;
+
     // Draw circle
     ctx.beginPath();
     ctx.arc(this.posX, this.posY, this._radius, 0, 2 * Math.PI);
@@ -121,6 +133,8 @@ class MouseFollower
     ctx.fillStyle = this._color;
     ctx.fill();
 
+    // Reset opacity for other drawing operations
+    ctx.globalAlpha = 1.0;
   }
 
   scaleIn() {
