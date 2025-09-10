@@ -101,6 +101,10 @@ class MouseFollower
       this._opacity = typeof options.opacity === 'string' ? parseFloat(options.opacity) : options.opacity;
       // Clamp opacity between 0 and 1
       this._opacity = Math.max(0, Math.min(1, this._opacity));
+      // Update canvas opacity immediately if canvas is initialized
+      if (this._canvasService && this._canvasService.canvas) {
+        this.updateCanvasOpacity();
+      }
     }
 
     return this.options;
@@ -115,6 +119,11 @@ class MouseFollower
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
 
+  updateCanvasOpacity() {
+    // Set the overall opacity of the canvas element
+    (this._canvasService.canvas as HTMLCanvasElement).style.opacity = this._opacity.toString();
+  }
+
   lerp(start: number, end: number, t: number): number {
     return start * (1 - t) + end * t;
   }
@@ -123,18 +132,12 @@ class MouseFollower
     const ctx = this._canvasService.context as CanvasRenderingContext2D;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    // Set opacity
-    ctx.globalAlpha = this._opacity;
-
     // Draw circle
     ctx.beginPath();
     ctx.arc(this.posX, this.posY, this._radius, 0, 2 * Math.PI);
     ctx.lineWidth = 5;
     ctx.fillStyle = this._color;
     ctx.fill();
-
-    // Reset opacity for other drawing operations
-    ctx.globalAlpha = 1.0;
   }
 
   scaleIn() {
@@ -241,8 +244,9 @@ class MouseFollower
     this._tickService.init();
     this._mouseEventsService.init();
 
-    // Set canvas to be transparent
+    // Set canvas to be transparent and apply opacity
     (this._canvasService.canvas as HTMLCanvasElement).style.backgroundColor = 'transparent';
+    this.updateCanvasOpacity();
 
     // Initialize position to current mouse position
     this.posX = this._mouseEventsService.clientX;
