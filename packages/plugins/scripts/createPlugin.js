@@ -157,6 +157,25 @@ function generatePluginPassword() {
   return (uuid1 + uuid2).substring(0, 28);
 }
 
+// Function to generate RTF install guide
+function generateInstallGuideRTF(displayName, slug, password) {
+  const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}
+\\f0\\fs24\\qc ${displayName} by Candlelight Plugins\\par
+\\par
+Plugin Install Guide:\\par
+https://candlelightplugins.com/${slug}\\par
+\\par
+Password:\\par
+${password}\\par
+\\par
+Happy designing and coding!\\par
+\\par
+The Candlelight Plugins Team\\par
+}`;
+  
+  return Buffer.from(rtfContent, 'utf8');
+}
+
 // Function to register plugin in MongoDB
 async function registerPluginInMongoDB(pluginData) {
   try {
@@ -277,6 +296,17 @@ async function createPlugin() {
     // Generate a secure UUID-based password for the plugin
     const pluginPassword = generatePluginPassword();
     
+    // Generate RTF install guide
+    const installGuideRTF = generateInstallGuideRTF(pluginName.trim(), kebabCase, pluginPassword);
+    
+    // Create downloads directory and save RTF file
+    const downloadsDir = path.join(pluginDir, 'assets', 'downloads');
+    ensureDir(downloadsDir);
+    
+    const rtfFilePath = path.join(downloadsDir, `${kebabCase}-install-guide.rtf`);
+    fs.writeFileSync(rtfFilePath, installGuideRTF);
+    console.log(`📄 Created: ${rtfFilePath}`);
+    
     // Prepare MongoDB data
     const pluginData = {
       name: pascalCase,
@@ -286,6 +316,7 @@ async function createPlugin() {
       bundlePath: `/plugins/${kebabCase}/bundle.js`,
       treeConfig,
       password: pluginPassword,
+      download: installGuideRTF.toString('base64'), // Convert Buffer to base64 for JSON transmission
       supportedPlatforms,
       squarespaceVersions: ['7.1'],
       isActive: true

@@ -56,6 +56,7 @@ export type Plugin = {
   password?: string;
   isActive: boolean;
   supportedPlatforms?: ('mobile' | 'tablet' | 'desktop')[];
+  download?: Buffer; // RTF file in binary format
   module?: () => Promise<any>;
 };
 

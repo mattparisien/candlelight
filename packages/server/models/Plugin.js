@@ -44,6 +44,10 @@ const pluginSchema = new mongoose.Schema({
     minlength: 16,
     maxlength: 32
   },
+  download: {
+    type: Buffer,
+    required: false
+  },
   supportedPlatforms: [{
     type: String,
     enum: ['desktop', 'mobile', 'tablet'],

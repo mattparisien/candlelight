@@ -159,12 +159,14 @@ app.post('/admin/plugins', async (req, res) => {
       description, 
       bundlePath, 
       treeConfig, 
+      password,
+      download,
       supportedPlatforms, 
       squarespaceVersions,
       isActive 
     } = req.body;
     
-    const plugin = new Plugin({
+    const pluginData = {
       name,
       slug,
       displayName,
@@ -174,7 +176,19 @@ app.post('/admin/plugins', async (req, res) => {
       supportedPlatforms: supportedPlatforms || ['desktop'],
       squarespaceVersions: squarespaceVersions || ['7.1'],
       isActive: isActive !== undefined ? isActive : true
-    });
+    };
+
+    // Add password if provided
+    if (password) {
+      pluginData.password = password;
+    }
+
+    // Convert base64 download data back to Buffer if provided
+    if (download) {
+      pluginData.download = Buffer.from(download, 'base64');
+    }
+    
+    const plugin = new Plugin(pluginData);
     
     await plugin.save();
     res.json({ success: true, plugin });
