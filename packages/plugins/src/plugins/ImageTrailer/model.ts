@@ -44,7 +44,7 @@ class ImageTrailer extends PluginBase<IImageTrailerptions> {
   private _posX: number = 0;
   private _posY: number = 0;
 
-  private _maxVelocity: number = 10;
+  private _maxVelocity: number = 1;
   private _fadeThreshold: number = 0.45; // Velocity threshold to start fading
   private _minOpacity: number = 0.0; // Minimum opacity (fully transparent)
   private _fadeRate: number = 0.08; // Rate at which the image fades out
@@ -53,7 +53,7 @@ class ImageTrailer extends PluginBase<IImageTrailerptions> {
   private _imageData: IImageData[] | null = null;
   private _debounceTickerId: any = null;
 
-  private readonly _mouseMoveThreshold: number = 50;
+  private readonly _mouseMoveThreshold: number = 100;
   private readonly _debounceTickerTimeout: number = 100;
 
   

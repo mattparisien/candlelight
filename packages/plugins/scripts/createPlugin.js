@@ -5,24 +5,7 @@ const path = require('path');
 const readline = require('readline');
 const { v4: uuidv4 } = require('uuid');
 
-// // Function to generate RTF install guide (same as createPlugin.js)
-function generateInstallGuideRTF(displayName, slug, password) {
-  const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}
-\\f0\\fs24\\qc\\b ${displayName} by Candlelight Plugins\\b0\\par
-\\par
-\\b Plugin Install Guide:\\b0\\par
-{\\field{\\*\\fldinst HYPERLINK "https://candlelightplugins.com/${slug}"}{\\fldrslt https://candlelightplugins.com/${slug}}}\\par
-\\par
-\\b Password:\\b0\\par
-${password}\\par
-\\par
-\\b Happy designing and coding!\\b0\\par
-\\par
-\\b The Candlelight Plugins Team\\b0\\par
-}`;
-  
-  return Buffer.from(rtfContent, 'utf8');
-} for node-fetch
+// Use dynamic import for node-fetch
 async function getFetch() {
   const { default: fetch } = await import('node-fetch');
   return fetch;
@@ -177,17 +160,17 @@ function generatePluginPassword() {
 // Function to generate RTF install guide
 function generateInstallGuideRTF(displayName, slug, password) {
   const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}
-\\f0\\fs24\\qc ${displayName} by Candlelight Plugins\\par
+\\f0\\fs24\\qc\\b ${displayName} by Candlelight Plugins\\b0\\par
 \\par
-Plugin Install Guide:\\par
-https://candlelightplugins.com/${slug}\\par
+\\b Plugin Install Guide:\\b0\\par
+{\\field{\\*\\fldinst HYPERLINK "https://candlelightplugins.com/${slug}"}{\\fldrslt https://candlelightplugins.com/${slug}}}\\par
 \\par
-Password:\\par
+\\b Password:\\b0\\par
 ${password}\\par
 \\par
-Happy designing and coding!\\par
+\\b Happy designing and coding!\\b0\\par
 \\par
-The Candlelight Plugins Team\\par
+\\b The Candlelight Plugins Team\\b0\\par
 }`;
   
   return Buffer.from(rtfContent, 'utf8');
