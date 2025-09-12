@@ -34,7 +34,7 @@ class ImageTrailer extends PluginBase<IImageTrailerptions> {
   private _imageService: ImageService | null = null;
   private _timelines: GSAPTimeline[] | null = null;
   private _currImageIdx: number = 0;
-  private _crop: EAspectRatio | null = null;
+  private _crop: EAspectRatio | null = EAspectRatio.Square;
   private _maxWidth: number = 240;
 
   private _isActive: boolean = false;
@@ -285,7 +285,10 @@ class ImageTrailer extends PluginBase<IImageTrailerptions> {
   createImages(images: IImageDetails[]): void {
     const wrappedImages: IImageData[] = images.map((image) => {
       const el = DomUtils.wrapElement(image.node, "div") as HTMLDivElement;
-      el.classList.add("trailer-image", `aspect-${this._crop || "intrinsic"}`);
+      
+      // Use the enum value directly for CSS class (e.g., "1:1", "4:5", etc.)
+      const cropClass = this._crop || "intrinsic";
+      el.classList.add("trailer-image", `aspect-${cropClass}`);
       el.style.maxWidth = this._maxWidth + "px";
       return {
         node: el,
