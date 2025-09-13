@@ -49,7 +49,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
       easing: "ease-out",
       startRadiusPx: 40,
       endRadiusViewportFactor: 0.9,
-      center: { x: 50, y: 60 },
+      center: { x: 50, y: 50 },
       ...options,
     };
   }

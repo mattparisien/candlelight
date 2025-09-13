@@ -54,12 +54,12 @@
   mask-mode: alpha;
 
   -webkit-mask-image: radial-gradient(
-    circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 60%),
+    circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 50%),
     transparent calc(var(--bsr-radius-px, 0px)),
     white calc(var(--bsr-radius-px, 0px) + 1px)
   ) !important;
   mask-image: radial-gradient(
-    circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 60%),
+    circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 50%),
     transparent calc(var(--bsr-radius-px, 0px)),
     white calc(var(--bsr-radius-px, 0px) + 1px)
   ) !important;
