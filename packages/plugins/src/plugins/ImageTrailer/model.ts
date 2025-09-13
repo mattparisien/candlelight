@@ -268,12 +268,15 @@ class ImageTrailer extends PluginBase<IImageTrailerptions> {
         }
       }
 
-      // Update position and apply opacity
-      image.lastPos.x += image.velocity.x;
-      image.lastPos.y += image.velocity.y;
+      // Update position and apply opacity only if image is visible
+      if (image.opacity > this._minOpacity) {
+        image.lastPos.x += image.velocity.x;
+        image.lastPos.y += image.velocity.y;
 
-      image.node.style.left = `${image.lastPos.x}px`;
-      image.node.style.top = `${image.lastPos.y}px`;
+        image.node.style.left = `${image.lastPos.x}px`;
+        image.node.style.top = `${image.lastPos.y}px`;
+      }
+      
       image.node.style.opacity = `${image.opacity}`;
     });
   }
