@@ -31,6 +31,7 @@ class MouseFollower
   private _tickService: AnimationFrameService;
   private _mouseEventsService: MouseEventsService;
 
+
   private _color: string = "#FBC9C2";
   private _radius: number = 20;
   private _speed: number = 0.1;
@@ -40,6 +41,7 @@ class MouseFollower
   private _colorProxy: string = this._color;
   private _radiusProxy: number = this._radius;
   private _isHoveringInteractive: boolean = false;
+  private _hasPointer: boolean = false;
 
   posX = 0;
   posY = 0;
@@ -158,42 +160,44 @@ class MouseFollower
   }
 
   onTick(): void {
+    if (!this._hasPointer) return; // avoid drawing from (0,0)
 
-    this.posX = this.lerp(
-      this.posX,
-      this._mouseEventsService.clientX,
-      this._speed
-    );
-    this.posY = this.lerp(
-      this.posY,
-      this._mouseEventsService.clientY,
-      this._speed
-    );
+    this.posX = this.lerp(this.posX, this._mouseEventsService.clientX, this._speed);
+    this.posY = this.lerp(this.posY, this._mouseEventsService.clientY, this._speed);
     this.draw();
   }
 
+  private setInitialFromEvent(e: MouseEvent) {
+    // Set exact position and draw once before animating radius
+    this.posX = e.clientX;
+    this.posY = e.clientY;
+    this._hasPointer = true;
+    this.draw();
+    this.scaleIn();
+  }
+  onMouseEnter(event: MouseEvent): void {
+    if (!this._hasPointer) {
+      this.setInitialFromEvent(event);
+      return;
+    }
+    if (this._radius === 0) this.scaleIn();
+  }
+
   onMouseMove(event: MouseEvent): void {
-    if (this._radius === 0 && !this.isDisabled) {
-      this.scaleIn();
-      this.isDisabled = true;
+    if (!this._hasPointer) {
+      this.setInitialFromEvent(event);
+      return; // skip hover logic this very first frame
     }
 
-    // Check if hovering over interactive elements
+    // (existing hover logic)
     const target = event.target as HTMLElement;
     const isOverInteractive = this.isOverInteractiveElement(target);
-    
+
     if (isOverInteractive && !this._isHoveringInteractive) {
       this._isHoveringInteractive = true;
       this.scaleOut();
     } else if (!isOverInteractive && this._isHoveringInteractive) {
       this._isHoveringInteractive = false;
-      this.scaleIn();
-    }
-  }
-
-  onMouseEnter(event: MouseEvent): void {
-    // Scale back in when mouse enters the page
-    if (this._radius === 0) {
       this.scaleIn();
     }
   }
@@ -241,21 +245,22 @@ class MouseFollower
     this._colorProxy = this._color;
 
     this._canvasService.init();
-    this._tickService.init();
-    this._mouseEventsService.init();
+    this.resizeCanvas();
 
-    // Set canvas to be transparent and apply opacity
+    // Transparent canvas + opacity
     (this._canvasService.canvas as HTMLCanvasElement).style.backgroundColor = 'transparent';
     this.updateCanvasOpacity();
 
-    // Initialize position to current mouse position
-    this.posX = this._mouseEventsService.clientX;
-    this.posY = this._mouseEventsService.clientY;
+    // START HIDDEN: scale from 0 later at real cursor position
+    this._radius = 0;
 
-    this.resizeCanvas();
+    // Start services AFTER canvas sizing
+    this._tickService.init();
+    this._mouseEventsService.init();
+
     this.addListeners();
-    this.draw();
   }
+
 }
 
 export default MouseFollower;
