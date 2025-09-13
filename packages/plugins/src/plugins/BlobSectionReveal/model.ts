@@ -5,6 +5,7 @@ import StickyService from "../_lib/services/StickyService";
 import MaskService, { MaskOptions } from "../_lib/services/MaskService";
 import DomUtils from "../_lib/utils/DomUtils";
 import { HTML_SELECTOR_MAP } from "../_lib/config/domMappings";
+import AnimationFrameService from "../_lib/services/AnimationFrameService";
 
 
 export interface IBlobSectionRevealOptions extends MaskOptions {
@@ -12,6 +13,7 @@ export interface IBlobSectionRevealOptions extends MaskOptions {
   easing?: string; // 'linear' | 'ease-in' | 'ease-out' (simple keywords)
   startRadiusPx?: number; // initial radial hole (px)
   endRadiusViewportFactor?: number; // final radius factor vs min viewport dimension
+  smoothing?: number; // 0 disables smoothing, 0-1 lerp factor per frame
 }
 
 
@@ -28,6 +30,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     "endRadiusViewportFactor",
     "svgPath",
     "center",
+    "smoothing",
   ];
 
   private options: PluginOptions<IBlobSectionRevealOptions>;
@@ -39,6 +42,11 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   private stickySvc!: StickyService;
   private maskSvc!: MaskService;
   private resizeObserver?: ResizeObserver;
+  private afSvc?: AnimationFrameService;
+
+  // Progress smoothing state
+  private targetProgress = 0;
+  private displayProgress = 0;
 
   constructor(container: HTMLElement, options: PluginOptions<IBlobSectionRevealOptions> = {}) {
 
@@ -50,6 +58,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
       startRadiusPx: 40,
       endRadiusViewportFactor: 0.9,
       center: { x: 50, y: 50 },
+      smoothing: 0.15,
       ...options,
     };
   }
@@ -60,6 +69,15 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     if (opts.durationVh !== undefined) {
       if (typeof opts.durationVh !== "number" || opts.durationVh <= 0) {
         throw new Error("BlobSectionReveal: 'durationVh' must be a positive number.");
+      }
+    }
+
+    if (opts.smoothing !== undefined) {
+      if (typeof opts.smoothing !== "number" || Number.isNaN(opts.smoothing)) {
+        throw new Error("BlobSectionReveal: 'smoothing' must be a number between 0 and 1.");
+      }
+      if (opts.smoothing < 0 || opts.smoothing > 1) {
+        throw new Error("BlobSectionReveal: 'smoothing' must be within [0, 1].");
       }
     }
   }
@@ -79,12 +97,19 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     this.maskSvc = new MaskService(this.topSection, this.options as MaskOptions);
     this.maskSvc.mount();
 
-    this.scrollSvc = new ScrollProgressService((p) => this.onProgress(p));
+    this.scrollSvc = new ScrollProgressService((p) => this.setTargetProgress(p));
     this.computeRanges();
     this.scrollSvc.attach();
 
     this.resizeObserver = new ResizeObserver(() => this.computeRanges());
     this.resizeObserver.observe(document.documentElement);
+
+    // Start animation loop for smoothing (only if enabled)
+    const smoothing = this.options.smoothing ?? 0;
+    if (smoothing > 0) {
+      this.afSvc = new AnimationFrameService((ts) => this.onTick(ts));
+      this.afSvc.startAnimation();
+    }
     
     console.log('BlobSectionReveal: Initialization complete');
   }
@@ -93,6 +118,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     this.scrollSvc?.detach();
     this.resizeObserver?.disconnect();
     this.maskSvc?.unmount();
+    this.afSvc?.stopAnimation();
 
     this.container.classList.remove("bsr-container");
     if (this.sticky && this.sticky.parentNode === this.container) {
@@ -152,7 +178,34 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     
     console.log('BlobSectionReveal: Current scroll:', y, 'raw progress:', raw, 'clamped progress:', progress);
     
-    this.onProgress(progress);
+    this.setTargetProgress(progress);
+  }
+
+  private setTargetProgress(progress: number) {
+    this.targetProgress = progress;
+    const smoothing = this.options.smoothing ?? 0;
+    // If smoothing is disabled, update immediately
+    if (!smoothing || smoothing <= 0) {
+      this.displayProgress = this.targetProgress;
+      this.onProgress(this.displayProgress);
+    }
+  }
+
+  private onTick(_timestamp: number) {
+    const smoothing = this.options.smoothing ?? 0;
+    if (!smoothing || smoothing <= 0) {
+      return; // handled immediately in setTargetProgress
+    }
+
+    // Lerp display toward target
+    const diff = this.targetProgress - this.displayProgress;
+    if (Math.abs(diff) < 0.0001) {
+      this.displayProgress = this.targetProgress;
+    } else {
+      this.displayProgress += diff * smoothing; // simple frame-based lerp
+    }
+
+    this.onProgress(this.displayProgress);
   }
 
   private onProgress(progress: number) {
