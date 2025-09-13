@@ -22,7 +22,7 @@ class PluginDataService {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       return 'http://localhost:3001';
     }
-    
+
     const baseUrl = process.env.PLUGIN_SERVER_URL || 'https://sqsp-pluginsserver-production.up.railway.app';
     return baseUrl;
   }
@@ -50,7 +50,7 @@ class PluginDataService {
       }
 
       const pluginsData: Plugin[] = await response.json();
-      
+
       // Map plugins and add module loaders dynamically
       this.plugins = pluginsData.map(plugin => ({
         ...plugin,
@@ -59,7 +59,7 @@ class PluginDataService {
       }));
 
       console.log(`Loaded ${this.plugins.length} plugins from server:`, this.plugins.map(p => p.displayName));
-      
+
       return this.plugins;
     } catch (error) {
       console.error('Error fetching plugins:', error);
@@ -81,6 +81,8 @@ class PluginDataService {
             return import('../../ImageTrailer/model');
           case 'LayeredSections':
             return import('../../LayeredSections/model');
+          case 'TextShuffle':
+            return import('../../TextShuffle/model');
           // case 'BlobRevealer':
           //   return import('../../BlobRevealer/model');
           default:
@@ -113,14 +115,14 @@ class PluginDataService {
       }
 
       const pluginData: Plugin = await response.json();
-      
+
       // Add module loader dynamically
       const pluginWithModule = {
         ...pluginData,
         treeConfig: pluginData.treeConfig,
         module: this.createModuleLoader(pluginData.name)
       };
-      
+
       return pluginWithModule;
     } catch (error) {
       console.error(`Error fetching plugin ${pluginName}:`, error);

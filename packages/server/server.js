@@ -74,6 +74,8 @@ app.get('/api/plugins/:slug', authenticateRequest, async (req, res) => {
     const domain = req.authorizedDomain;
     const { slug } = req.params;
     
+
+    
     if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {
       return res.status(404).json({ error: 'Plugin not found or not authorized for this domain' });
     }

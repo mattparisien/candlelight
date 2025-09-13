@@ -17,6 +17,7 @@
     "start:server": "npm run start --workspace=packages/server",
     "create-plugin": "npm run create-plugin --workspace=packages/plugins",
     "create-plugin-mixin": "npm run create-plugin-mixin --workspace=packages/plugins",
+    "activate-plugin": "npm run plugins:activate --workspace=packages/server",
     "deploy:plugins": "node deploy-plugins.js",
     "build:deploy": "npm run build:plugins && npm run deploy:plugins",
     "install-all": "npm install && npm install --workspace=packages/plugins && npm install --workspace=packages/server",

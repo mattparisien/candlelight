@@ -1,0 +1,24 @@
+// Styles for text-shuffle plugin
+h1 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10vw;
+}
+
+[data-candlelight-plugin-text-shuffle] {
+  // Add your plugin styles here
+  transition: all 0.3s ease;
+  
+  &:hover {
+    // Add hover styles
+  }
+}
+
+// Add responsive styles
+@media (max-width: 768px) {
+  [data-candlelight-plugin-text-shuffle] {
+    // Mobile styles
+  }
+}

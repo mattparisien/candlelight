@@ -14,7 +14,8 @@
     "domains:migrate": "node scripts/migrate-domains.js",
     "domains:seed": "node scripts/seed-domains.js",
     "plugins:seed": "node scripts/seed-plugins.js",
-    "plugins:add-passwords": "node scripts/add-passwords-to-plugins.js"
+    "plugins:add-passwords": "node scripts/add-passwords-to-plugins.js",
+    "plugins:activate": "node scripts/activate-plugins.js"
   },
   "keywords": [
     "authentication",

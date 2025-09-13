@@ -118,18 +118,20 @@ export async function initializePlugin(pluginName: string): Promise<void> {
           `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`
         );
 
+      console.log('Plugin configuration:', plugin);
       // Check device compatibility
       if (plugin.supportedPlatforms && plugin.supportedPlatforms.length > 0) {
         const deviceType = DeviceService.getDeviceType();
         const isDeviceSupported = plugin.supportedPlatforms.includes(deviceType);
-        
+
         if (!isDeviceSupported) {
           console.log(`Plugin ${pluginName} is not supported on ${deviceType}. Supported platforms: ${plugin.supportedPlatforms.join(', ')}`);
           return;
         }
-        
+
         console.log(`Device compatibility check passed for ${pluginName} on ${deviceType}`);
       }
+
 
 
       if (plugin.isActive && plugin.module) {
@@ -170,10 +172,17 @@ export async function initializePlugin(pluginName: string): Promise<void> {
         } else {
           // Fallback to old HTML_SELECTOR_MAP behavior
           containerNodes = Array.from(document.querySelectorAll(HTML_SELECTOR_MAP.get(pluginName)))
-          containerNodes.forEach(container => {
-            const instance = new Class(container, options);
+
+          if (containerNodes?.length) {
+            containerNodes.forEach(container => {
+              const instance = new Class(container, options);
+              instance.init();
+            })
+          } else {
+            const instance = new Class(document.body, options);
             instance.init();
-          })
+          }
+
         }
 
       }

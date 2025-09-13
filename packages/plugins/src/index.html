@@ -9,6 +9,7 @@
 </head>
 
 <body id="collection-726362727h" style="background-color: #F15236; color: #FBC9C2;">
+  <h1>Hello!</h1>
   <!-- <button class="sqs-block-button-element">Hello!!!</button> -->
   <section></section>
   <section>
@@ -41,59 +42,3 @@
 </body>
 
 </html>
-<script>
-  const addDemoVideos2 = () => {
-
-    const videosSection = document.querySelector("[data-section-id='68b882e5cf5f04108007a61c']");
-    const videoWrappers = Array.from(videosSection.querySelectorAll(".sqs-native-video"));
-    const videoConfigs = videoWrappers.map(x => ({
-      wrapper: x,
-      config: JSON.parse(x.dataset.configVideo)
-    }));
-
-
-    const productGridSection = document.querySelector(".product-detail-section");
-
-    if (!productGridSection) return;
-
-    const productGridImageWrappers = Array.from(productGridSection.querySelectorAll(".product-gallery .product-gallery-slides-item"));
-
-    const title = document.querySelector(".product-title")?.innerText;
-
-    const cleansedTitle = title
-      .replace("Plugin", "")
-      .replace(/\s+/g, "")
-      .trim();
-
-    console.log(productGridImageWrappers);
-    productGridImageWrappers.forEach((imgWrapper, i) => {
-      const videoObj = videoConfigs.find(x => x.config.filename.replace(".mov", "") === cleansedTitle);
-
-      if (videoObj) {
-        const videoEl = videoObj.wrapper.querySelector("video");
-        videoEl.style.width = "100%";
-        videoEl.style.height = "100%";
-        videoEl.autoplay = "true";
-        videoEl.playsInLine = "true";
-        videoEl.muted = "true";
-        videoEl.loop = "true";
-
-        if (videoEl) {
-          const img = imgWrapper.querySelector("img");
-          if (img) {
-            img.replaceWith(videoEl);
-          }
-        }
-
-      }
-
-
-
-    });
-  };
-
-  const init2 = () => {
-    addDemoVideos2();
-  };
-  window.addEventListener("load", init);
-</script>
