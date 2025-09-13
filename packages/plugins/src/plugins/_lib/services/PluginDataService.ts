@@ -24,7 +24,6 @@ class PluginDataService {
     }
     
     const baseUrl = process.env.PLUGIN_SERVER_URL || 'https://sqsp-pluginsserver-production.up.railway.app';
-    console.log('Using base URL:', baseUrl);
     return baseUrl;
   }
 
@@ -121,8 +120,6 @@ class PluginDataService {
         treeConfig: pluginData.treeConfig,
         module: this.createModuleLoader(pluginData.name)
       };
-
-      console.log(`Loaded plugin from server: ${pluginWithModule.displayName} (slug: ${slug})`);
       
       return pluginWithModule;
     } catch (error) {

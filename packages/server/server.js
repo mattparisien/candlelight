@@ -10,7 +10,7 @@ const Plugin = require('./models/Plugin');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/plugin-auth';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // Security middleware
 app.use(helmet({
