@@ -163,8 +163,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     // Calculate radius to cover entire viewport diagonal
     const diagonal = Math.sqrt(window.innerWidth ** 2 + window.innerHeight ** 2);
     const endR = diagonal * 0.6; // Ensure full coverage
-    const startR = this.options.startRadiusPx || 40;
-    const radiusPx = startR + (endR - startR) * t;
+    const radiusPx = endR * t; // Start at 0, scale to full diagonal
     const scale = 0.1 + 3.0 * t; // used for SVG-path blob
 
     console.log('BlobSectionReveal: Eased progress:', t, 'radius:', radiusPx, 'diagonal:', diagonal);

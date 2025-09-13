@@ -55,13 +55,13 @@
 
   -webkit-mask-image: radial-gradient(
     circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 60%),
-    transparent calc(var(--bsr-radius-px, 40px) - 2px),
-    white var(--bsr-radius-px, 40px)
+    transparent calc(var(--bsr-radius-px, 0px)),
+    white calc(var(--bsr-radius-px, 0px) + 1px)
   ) !important;
   mask-image: radial-gradient(
     circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 60%),
-    transparent calc(var(--bsr-radius-px, 40px) - 2px),
-    white var(--bsr-radius-px, 40px)
+    transparent calc(var(--bsr-radius-px, 0px)),
+    white calc(var(--bsr-radius-px, 0px) + 1px)
   ) !important;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
