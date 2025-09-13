@@ -42,6 +42,7 @@ class MouseFollower
   private _radiusProxy: number = this._radius;
   private _isHoveringInteractive: boolean = false;
   private _hasPointer: boolean = false;
+  private _leavingWindow: boolean = false; // track window-exit fade state
 
   posX = 0;
   posY = 0;
@@ -82,6 +83,10 @@ class MouseFollower
       {
         event: EMouseEvent.Leave,
         handler: this.onMouseLeave.bind(this),
+      },
+      {
+        event: EMouseEvent.Out,
+        handler: this.onMouseOut.bind(this),
       },
     ]);
   }
@@ -153,9 +158,12 @@ class MouseFollower
     }
   }
 
-  scaleOut() {
+  // Allow optional onComplete for cases like leaving window
+  scaleOut(onComplete?: () => void) {
     if (this._radius !== 0) {
-      gsap.to(this, { _radius: 0, ease: "Power3.Out", duration: this._fadeSpeed });
+      gsap.to(this, { _radius: 0, ease: "Power3.Out", duration: this._fadeSpeed, onComplete });
+    } else if (onComplete) {
+      onComplete();
     }
   }
 
@@ -176,6 +184,9 @@ class MouseFollower
     this.scaleIn();
   }
   onMouseEnter(event: MouseEvent): void {
+    // Cancel any pending window-leave reset
+    this._leavingWindow = false;
+
     if (!this._hasPointer) {
       this.setInitialFromEvent(event);
       return;
@@ -203,13 +214,30 @@ class MouseFollower
   }
 
   onMouseLeave(event: MouseEvent): void {
-    // Scale out when mouse leaves the page
-    this.scaleOut();
+    // Treat like leaving the window; fade out, then allow re-anchor
+    if (this._leavingWindow) return; // already processing a window leave
+    this._leavingWindow = true;
+    this.scaleOut(() => {
+      if (this._leavingWindow) {
+        this._hasPointer = false; // re-anchor on next enter, but only if still outside
+        this._leavingWindow = false;
+      }
+    });
   }
 
   onMouseOut(event: MouseEvent): void {
-    // this.scaleOut();
-    this.isDisabled = false;
+    // Scale out only when the pointer leaves the window (no relatedTarget)
+    const toElement = (event.relatedTarget || (event as any).toElement) as Node | null;
+    if (!toElement) {
+      if (this._leavingWindow) return; // already processing a window leave
+      this._leavingWindow = true;
+      this.scaleOut(() => {
+        if (this._leavingWindow) {
+          this._hasPointer = false; // ensures we re-anchor on next enter
+          this._leavingWindow = false;
+        }
+      });
+    }
   }
 
   addListeners() {
