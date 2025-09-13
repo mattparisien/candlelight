@@ -11,7 +11,6 @@
   background: var(--color-2, #fda085);
 }
 
-
 .bsr-container {
   position: relative;
   // total height: 100vh (initial) + duration lock
@@ -33,7 +32,6 @@
   inset: 0;
 }
 
-
 .bsr-sticky > *:nth-child(2) {
   z-index: 0;
 }
@@ -52,16 +50,19 @@
 
 // Radial mask fallback (fast & widely supported)
 .bsr-top--use-radial-mask {
+  // Force alpha mode so gradient transparency drives the mask
+  mask-mode: alpha;
+
   -webkit-mask-image: radial-gradient(
     circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 60%),
     transparent calc(var(--bsr-radius-px, 40px) - 1px),
-    black var(--bsr-radius-px, 40px)
-  );
+    white var(--bsr-radius-px, 40px)
+  ) !important;
   mask-image: radial-gradient(
     circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 60%),
     transparent calc(var(--bsr-radius-px, 40px) - 1px),
-    black var(--bsr-radius-px, 40px)
-  );
+    white var(--bsr-radius-px, 40px)
+  ) !important;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: 100% 100%;
@@ -69,7 +70,14 @@
 }
 
 // Helpful defaults for sections (can be overridden by site styles)
-[data-candlelight-plugin-blob-section-reveal] > .bsr-sticky > * {
-  display: grid;
-  place-items: center;
+[data-candlelight-blob-section-reveal] {
+
+  .page-section {
+    height: 100vh;
+  }
+
+  & > .bsr-sticky > * {
+    display: grid;
+    place-items: center;
+  }
 }

@@ -21,6 +21,7 @@ export default class MaskService {
 
   mount() {
     if (this.opt.svgPath) {
+      console.log('MaskService: Mounting SVG mask with path:', this.opt.svgPath);
       this.usesSvg = true;
       const svgNS = "http://www.w3.org/2000/svg";
       this.svg = document.createElementNS(svgNS, "svg");
@@ -61,9 +62,11 @@ export default class MaskService {
       (this.topSection.style as any).mask = `url(#${this._maskId})`;
       this.topSection.classList.add("bsr-top--use-svg-mask");
     } else {
+      console.log('MaskService: Mounting radial mask with center:', this.opt.center);
       this.topSection.classList.add("bsr-top--use-radial-mask");
       this.topSection.style.setProperty("--bsr-center-x", this.opt.center.x + "%");
       this.topSection.style.setProperty("--bsr-center-y", this.opt.center.y + "%");
+      console.log('MaskService: Added bsr-top--use-radial-mask class to top section');
     }
   }
 
@@ -75,9 +78,12 @@ export default class MaskService {
         "transform",
         `translate(${tx} ${ty}) scale(${scale}) translate(${-tx} ${-ty})`
       );
+      console.log('MaskService: Updated SVG path transform with scale:', scale);
     } else {
-      this.topSection.style.setProperty("--bsr-radius-px", `${radiusPx}`);
+      this.topSection.style.setProperty("--bsr-radius-px", `${radiusPx}px`);
       this.topSection.style.setProperty("--bsr-progress", String(progress));
+      console.log('MaskService: Updated CSS variables - radius:', radiusPx + 'px', 'progress:', progress);
+      console.log('MaskService: Top section classes:', this.topSection.className);
     }
   }
 
