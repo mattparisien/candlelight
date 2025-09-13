@@ -81,8 +81,8 @@ class PluginDataService {
             return import('../../ImageTrailer/model');
           case 'LayeredSections':
             return import('../../LayeredSections/model');
-          case 'TextShuffle':
-            return import('../../TextShuffle/model');
+          case 'BlobSectionReveal':
+            return import('../../BlobSectionReveal/model');
           // case 'BlobRevealer':
           //   return import('../../BlobRevealer/model');
           default:

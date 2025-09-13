@@ -1,0 +1,75 @@
+.page-section {
+  height: 100vh;
+  width: 100vw;
+}
+
+.page-section:nth-child(1) {
+  background: var(--color-1, #f6d365);
+}
+
+.page-section:nth-child(2) {
+  background: var(--color-2, #fda085);
+}
+
+
+.bsr-container {
+  position: relative;
+  // total height: 100vh (initial) + duration lock
+  min-height: calc((1 + var(--bsr-duration-vh, 1)) * 100vh);
+}
+
+.bsr-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: clip;
+  contain: layout paint size;
+  will-change: transform;
+}
+
+.bsr-sticky > *:nth-child(1),
+.bsr-sticky > *:nth-child(2) {
+  position: absolute;
+  inset: 0;
+}
+
+
+.bsr-sticky > *:nth-child(2) {
+  z-index: 0;
+}
+.bsr-sticky > *:nth-child(1) {
+  z-index: 1;
+  transition: filter 300ms ease;
+}
+
+// Optional: dim the top slightly during reveal
+.bsr-top--revealing {
+  filter: brightness(0.96);
+}
+.bsr-top--done {
+  filter: brightness(0.92);
+}
+
+// Radial mask fallback (fast & widely supported)
+.bsr-top--use-radial-mask {
+  -webkit-mask-image: radial-gradient(
+    circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 60%),
+    transparent calc(var(--bsr-radius-px, 40px) - 1px),
+    black var(--bsr-radius-px, 40px)
+  );
+  mask-image: radial-gradient(
+    circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 60%),
+    transparent calc(var(--bsr-radius-px, 40px) - 1px),
+    black var(--bsr-radius-px, 40px)
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+// Helpful defaults for sections (can be overridden by site styles)
+[data-candlelight-plugin-blob-section-reveal] > .bsr-sticky > * {
+  display: grid;
+  place-items: center;
+}

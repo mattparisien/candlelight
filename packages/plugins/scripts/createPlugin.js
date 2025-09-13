@@ -159,19 +159,7 @@ function generatePluginPassword() {
 
 // Function to generate RTF install guide
 function generateInstallGuideRTF(displayName, slug, password) {
-  const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}
-\\f0\\fs24\\qc\\b ${displayName} by Candlelight Plugins\\b0\\par
-\\par
-\\b Plugin Install Guide:\\b0\\par
-{\\field{\\*\\fldinst HYPERLINK "https://candlelightplugins.com/${slug}"}{\\fldrslt https://candlelightplugins.com/${slug}}}\\par
-\\par
-\\b Password:\\b0\\par
-${password}\\par
-\\par
-\\b Happy designing and coding!\\b0\\par
-\\par
-\\b The Candlelight Plugins Team\\b0\\par
-}`;
+  const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}\n\\f0\\fs24\\qc\\b ${displayName} by Candlelight Plugins\\b0\\par\n\\par\n\\b Plugin Install Guide:\\b0\\par\n{\\field{\\*\\fldinst HYPERLINK "https://candlelightplugins.com/${slug}"}{\\fldrslt https://candlelightplugins.com/${slug}}}\\par\n\\par\n\\b Password:\\b0\\par\n${password}\\par\n\\par\n\\b Happy designing and coding!\\b0\\par\n\\par\n\\b The Candlelight Plugins Team\\b0\\par\n}`;
   
   return Buffer.from(rtfContent, 'utf8');
 }
@@ -228,7 +216,7 @@ async function createPlugin() {
 
     // Get tree configuration preference
     const treeConfigChoice = await new Promise((resolve) => {
-      rl.question('🌳 Default tree config? (1=body, 2=button, 3=section, 4=none): ', resolve);
+      rl.question('🌳 Default tree config? (1=body, 2=button, 3=section, 4=none, 5=custom): ', resolve);
     });
 
     // Get supported platforms
@@ -240,18 +228,20 @@ async function createPlugin() {
     
     // Determine tree config
     let treeConfig = null;
-    switch(treeConfigChoice) {
-      case '1':
-        treeConfig = { element: "div", appendTo: "body" };
-        break;
-      case '2':
-        treeConfig = "button";
-        break;
-      case '3':
-        treeConfig = "section";
-        break;
-      default:
-        treeConfig = null;
+    const tc = String(treeConfigChoice || '').trim().toLowerCase();
+    if (tc.startsWith('1') || tc === 'body') {
+      treeConfig = { element: "div", appendTo: "body" };
+    } else if (tc.startsWith('2') || tc === 'button') {
+      treeConfig = "button";
+    } else if (tc.startsWith('3') || tc === 'section') {
+      treeConfig = "section";
+    } else if (tc.startsWith('5') || tc.includes('custom')) {
+      const customTreeConfig = await new Promise((resolve) => {
+        rl.question('   Enter custom selector (CSS): ', resolve);
+      });
+      treeConfig = (customTreeConfig || '').trim() || null;
+    } else {
+      treeConfig = null;
     }
 
     // Determine supported platforms
