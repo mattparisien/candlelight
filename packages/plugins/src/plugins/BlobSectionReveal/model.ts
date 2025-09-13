@@ -160,13 +160,14 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     
     const t = this.sampleEase(progress);
 
-    const minViewport = Math.min(window.innerWidth, window.innerHeight);
-    const endR = (this.options.endRadiusViewportFactor || 0.9) * minViewport * 0.5;
+    // Calculate radius to cover entire viewport diagonal
+    const diagonal = Math.sqrt(window.innerWidth ** 2 + window.innerHeight ** 2);
+    const endR = diagonal * 0.6; // Ensure full coverage
     const startR = this.options.startRadiusPx || 40;
     const radiusPx = startR + (endR - startR) * t;
     const scale = 0.1 + 3.0 * t; // used for SVG-path blob
 
-    console.log('BlobSectionReveal: Eased progress:', t, 'radius:', radiusPx, 'scale:', scale);
+    console.log('BlobSectionReveal: Eased progress:', t, 'radius:', radiusPx, 'diagonal:', diagonal);
 
     this.sticky.style.setProperty("--bsr-progress", String(progress));
     this.sticky.style.setProperty("--bsr-progress-eased", String(t));

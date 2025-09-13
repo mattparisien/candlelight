@@ -55,18 +55,20 @@
 
   -webkit-mask-image: radial-gradient(
     circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 60%),
-    transparent calc(var(--bsr-radius-px, 40px) - 1px),
+    transparent calc(var(--bsr-radius-px, 40px) - 2px),
     white var(--bsr-radius-px, 40px)
   ) !important;
   mask-image: radial-gradient(
     circle at var(--bsr-center-x, 50%) var(--bsr-center-y, 60%),
-    transparent calc(var(--bsr-radius-px, 40px) - 1px),
+    transparent calc(var(--bsr-radius-px, 40px) - 2px),
     white var(--bsr-radius-px, 40px)
   ) !important;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
+  -webkit-mask-size: 200% 200%;
+  mask-size: 200% 200%;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
 // Helpful defaults for sections (can be overridden by site styles)
