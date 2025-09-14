@@ -149,8 +149,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
 
     this.container = wrapper;
 
-    console.log(this.container);
-    console.log(this.container.children);
+
 
     const children = Array.from(this.container.children) as HTMLElement[];
     if (children.length < 2) throw new Error("BlobSectionReveal requires two direct children.");
