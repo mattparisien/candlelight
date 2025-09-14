@@ -21,7 +21,6 @@ export default class ClipPathService {
 
   mount() {
     if (this.opt.svgPath) {
-      console.log('ClipPathService: Mounting SVG clip-path with path:', this.opt.svgPath);
       this.usesSvg = true;
       const svgNS = "http://www.w3.org/2000/svg";
       this.svg = document.createElementNS(svgNS, "svg");
@@ -52,7 +51,6 @@ export default class ClipPathService {
       this.topSection.style.clipPath = `url(#${this._clipPathId})`;
       this.topSection.classList.add("bsr-top--use-svg-clippath");
     } else {
-      console.log('ClipPathService: Mounting radial clip-path with center:', this.opt.center);
       this.topSection.classList.add("bsr-top--use-radial-clippath");
       this.topSection.style.setProperty("--bsr-center-x", this.opt.center.x + "%");
       this.topSection.style.setProperty("--bsr-center-y", this.opt.center.y + "%");
@@ -63,7 +61,7 @@ export default class ClipPathService {
 
   update(progress: number, radiusPx: number, scale: number) {
     if (this.usesSvg && this.pathEl) {
-      // Position the blob at center of viewport and scale it
+      // Position the blob at center of viewport and scale from its own center
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
       
@@ -71,16 +69,15 @@ export default class ClipPathService {
       // At scale 0, blob is invisible; at scale 20, blob covers viewport
       const pixelScale = scale * 2; // Scale 0-40 range
       
+      // Proper transform: translate to viewport center, scale from blob center (0,0), then offset back
       this.pathEl.setAttribute(
         "transform",
-        `translate(${centerX} ${centerY}) scale(${pixelScale}) translate(0 0)`
+        `translate(${centerX} ${centerY}) scale(${pixelScale})`
       );
-      console.log('ClipPathService: Updated SVG clip-path - center:', centerX, centerY, 'scale:', pixelScale);
     } else {
       // Use CSS circle() for radial clip-path
       const radius = Math.min(radiusPx, 2000); // Cap radius for performance
       this.topSection.style.clipPath = `circle(${radius}px at ${this.opt.center.x}% ${this.opt.center.y}%)`;
-      console.log('ClipPathService: Updated CSS clip-path - radius:', radius + 'px');
     }
   }
 

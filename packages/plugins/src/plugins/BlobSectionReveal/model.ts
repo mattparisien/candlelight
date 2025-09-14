@@ -89,7 +89,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     this.stickySvc = new StickyService(this.container, durationVh);
     this.stickySvc.applyBaseLayout();
 
-    this.clipPathSvc = new ClipPathService(this.topSection, this.options as ClipPathOptions);
+    this.clipPathSvc = new ClipPathService(this.bottomSection, this.options as ClipPathOptions);
     this.clipPathSvc.mount();
 
     this.scrollSvc = new ScrollProgressService((p) => this.setTargetProgress(p));

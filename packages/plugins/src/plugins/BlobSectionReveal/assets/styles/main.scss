@@ -3,18 +3,18 @@
   width: 100vw;
 }
 
-.page-section:nth-child(1) {
-  background: var(--color-1, #f6d365);
-}
-
-.page-section:nth-child(2) {
-  background: var(--color-2, #fda085);
-}
-
 .bsr-container {
   position: relative;
   // total height: 100vh (initial) + duration lock
   min-height: calc((1 + var(--bsr-duration-vh, 1)) * 100vh);
+
+  .page-section:nth-child(1) {
+    background: var(--color-1, #f6d365);
+  }
+
+  .page-section:nth-child(2) {
+    background: var(--color-2, #fda085);
+  }
 }
 
 .bsr-sticky {
@@ -33,10 +33,10 @@
 }
 
 .bsr-sticky > *:nth-child(2) {
-  z-index: 0;
+  z-index: 1;
 }
 .bsr-sticky > *:nth-child(1) {
-  z-index: 1;
+  z-index: 0;
   transition: filter 300ms ease;
 }
 
@@ -73,7 +73,6 @@
 
 // Helpful defaults for sections (can be overridden by site styles)
 [data-candlelight-blob-section-reveal] {
-
   .page-section {
     height: 100vh;
   }
