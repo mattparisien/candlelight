@@ -30,7 +30,7 @@
 
 .bsr-sticky > *:nth-child(1),
 .bsr-sticky > *:nth-child(2) {
-  position: absolute;
+  position: absolute !important;
   inset: 0;
 }
 
