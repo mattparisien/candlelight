@@ -140,6 +140,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   // ───────────────────────────────────────────────────────────────────────────
   private setupDOM() {
     const section = this.getParentSection(this.container);
+    console.log('the section:', section);
     if (!section) throw new Error("BlobSectionReveal must be inside a <section>.");
 
     const wrapper = this.wrapSections(section);
