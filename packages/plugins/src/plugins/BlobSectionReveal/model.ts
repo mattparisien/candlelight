@@ -83,13 +83,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   }
 
   init(): void {
-    console.log('BlobSectionReveal: Starting initialization...');
     this.setupDOM();
-
-    console.log('BlobSectionReveal: DOM setup complete, container:', this.container);
-    console.log('BlobSectionReveal: Top section:', this.topSection);
-    console.log('BlobSectionReveal: Bottom section:', this.bottomSection);
-
     const durationVh = this.options.durationVh ?? 1;
     this.stickySvc = new StickyService(this.container, durationVh);
     this.stickySvc.applyBaseLayout();
@@ -110,8 +104,6 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
       this.afSvc = new AnimationFrameService((ts) => this.onTick(ts));
       this.afSvc.startAnimation();
     }
-    
-    console.log('BlobSectionReveal: Initialization complete');
   }
 
   destroy(): void {
@@ -166,18 +158,13 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     const rect = this.container.getBoundingClientRect();
     const start = window.scrollY + rect.top;
     const end = start + (this.options.durationVh! * window.innerHeight);
-    
-    console.log('BlobSectionReveal: Computing ranges - start:', start, 'end:', end, 'duration:', this.options.durationVh);
-    console.log('BlobSectionReveal: Container rect:', rect);
-    
+
     this.scrollSvc.setRange(start, end);
 
     const y = window.scrollY || window.pageYOffset;
     const raw = (y - start) / Math.max(1, end - start);
     const progress = Math.max(0, Math.min(1, raw));
-    
-    console.log('BlobSectionReveal: Current scroll:', y, 'raw progress:', raw, 'clamped progress:', progress);
-    
+
     this.setTargetProgress(progress);
   }
 
@@ -209,8 +196,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   }
 
   private onProgress(progress: number) {
-    console.log('BlobSectionReveal: onProgress called with:', progress);
-    
+
     const t = this.sampleEase(progress);
 
     // Calculate radius to cover entire viewport diagonal
@@ -219,7 +205,6 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     const radiusPx = endR * t; // Start at 0, scale to full diagonal
     const scale = 0.1 + 3.0 * t; // used for SVG-path blob
 
-    console.log('BlobSectionReveal: Eased progress:', t, 'radius:', radiusPx, 'diagonal:', diagonal);
 
     this.sticky.style.setProperty("--bsr-progress", String(progress));
     this.sticky.style.setProperty("--bsr-progress-eased", String(t));
@@ -229,11 +214,9 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     } else if (progress < 1) {
       this.topSection.classList.add("bsr-top--revealing");
       this.topSection.classList.remove("bsr-top--done");
-      console.log('BlobSectionReveal: Added bsr-top--revealing class');
     } else {
       this.topSection.classList.add("bsr-top--done");
       this.topSection.classList.remove("bsr-top--revealing");
-      console.log('BlobSectionReveal: Added bsr-top--done class');
     }
 
     this.maskSvc.update(progress, radiusPx, scale);
