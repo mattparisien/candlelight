@@ -134,7 +134,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   }
 
   private wrapSections(section) {
-    return DomUtils.wrapSiblings(section, "div", 1, { class: "bsr-wrapper" }, true);
+    return DomUtils.wrapSiblings(section, "div", 0, { class: "bsr-wrapper" }, true);
   }
 
   // ───────────────────────────────────────────────────────────────────────────
