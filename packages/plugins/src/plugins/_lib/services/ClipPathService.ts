@@ -105,14 +105,32 @@ export default class ClipPathService {
 
     const numPaths = this.morphPaths.length;
     
-    if (progress <= 0) return this.morphPaths[0];
-    if (progress >= 1) return this.morphPaths[numPaths - 1];
+    // Calculate morph completion percentage based on number of paths
+    // For 2 paths: complete by 20%, for 3 paths: complete by 30%, etc.
+    const morphCompletionPercentage = (numPaths - 1) * 0.025 + 0.025; // 0.2 for 2 paths, 0.3 for 3 paths, etc.
+    
+    // Scale progress so morphing completes by the calculated percentage
+    const morphProgress = Math.min(progress / morphCompletionPercentage, 1.0);
+    
+    if (morphProgress <= 0) return this.morphPaths[0];
+    if (morphProgress >= 1) return this.morphPaths[numPaths - 1];
 
     // Calculate which two paths to interpolate between
-    const scaledProgress = progress * (numPaths - 1);
+    const scaledProgress = morphProgress * (numPaths - 1);
     const fromIndex = Math.floor(scaledProgress);
     const toIndex = Math.min(fromIndex + 1, numPaths - 1);
     const localProgress = scaledProgress - fromIndex;
+    
+    console.log('Interpolating paths:', { 
+      originalProgress: progress, 
+      morphProgress, 
+      morphCompletionPercentage, 
+      scaledProgress, 
+      fromIndex, 
+      toIndex, 
+      localProgress, 
+      numPaths 
+    });
 
     return this.interpolateTwoPaths(
       this.morphPaths[fromIndex],
