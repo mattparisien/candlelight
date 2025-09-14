@@ -55,7 +55,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     super(container, "BlobSectionReveal");
 
     this.options = {
-      durationVh: 1,
+      durationVh: 0.6, // Reduced from 1 to 0.6 to complete animation faster
       easing: "ease-out",
       startRadiusPx: 40,
       endRadiusViewportFactor: 0.9,
@@ -76,20 +76,86 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   protected validateOptions(userOptions: Partial<PluginOptions<IBlobSectionRevealOptions>>, defaultOptions: PluginOptions<IBlobSectionRevealOptions>): void | PluginOptions<IBlobSectionRevealOptions> {
     const opts = { ...defaultOptions, ...userOptions };
 
+    // Validate and cap durationVh (min: 0.1, max: 5.0)
     if (opts.durationVh !== undefined) {
-      if (typeof opts.durationVh !== "number" || opts.durationVh <= 0) {
-        throw new Error("BlobSectionReveal: 'durationVh' must be a positive number.");
+      if (typeof opts.durationVh !== "number" || Number.isNaN(opts.durationVh)) {
+        console.warn("BlobSectionReveal: 'durationVh' must be a number. Using default value.");
+        opts.durationVh = defaultOptions.durationVh;
+      } else {
+        opts.durationVh = Math.max(0.1, Math.min(5.0, opts.durationVh));
+        if (opts.durationVh !== userOptions.durationVh) {
+          console.warn(`BlobSectionReveal: 'durationVh' capped to ${opts.durationVh} (range: 0.1-5.0)`);
+        }
       }
     }
 
+    // Validate and cap smoothing (min: 0, max: 1)
     if (opts.smoothing !== undefined) {
       if (typeof opts.smoothing !== "number" || Number.isNaN(opts.smoothing)) {
-        throw new Error("BlobSectionReveal: 'smoothing' must be a number between 0 and 1.");
-      }
-      if (opts.smoothing < 0 || opts.smoothing > 1) {
-        throw new Error("BlobSectionReveal: 'smoothing' must be within [0, 1].");
+        console.warn("BlobSectionReveal: 'smoothing' must be a number. Using default value.");
+        opts.smoothing = defaultOptions.smoothing;
+      } else {
+        opts.smoothing = Math.max(0, Math.min(1, opts.smoothing));
+        if (opts.smoothing !== userOptions.smoothing) {
+          console.warn(`BlobSectionReveal: 'smoothing' capped to ${opts.smoothing} (range: 0-1)`);
+        }
       }
     }
+
+    // Validate and cap startRadiusPx (min: 0, max: 500)
+    if (opts.startRadiusPx !== undefined) {
+      if (typeof opts.startRadiusPx !== "number" || Number.isNaN(opts.startRadiusPx)) {
+        console.warn("BlobSectionReveal: 'startRadiusPx' must be a number. Using default value.");
+        opts.startRadiusPx = defaultOptions.startRadiusPx;
+      } else {
+        opts.startRadiusPx = Math.max(0, Math.min(500, opts.startRadiusPx));
+        if (opts.startRadiusPx !== userOptions.startRadiusPx) {
+          console.warn(`BlobSectionReveal: 'startRadiusPx' capped to ${opts.startRadiusPx} (range: 0-500)`);
+        }
+      }
+    }
+
+    // Validate and cap endRadiusViewportFactor (min: 0.1, max: 3.0)
+    if (opts.endRadiusViewportFactor !== undefined) {
+      if (typeof opts.endRadiusViewportFactor !== "number" || Number.isNaN(opts.endRadiusViewportFactor)) {
+        console.warn("BlobSectionReveal: 'endRadiusViewportFactor' must be a number. Using default value.");
+        opts.endRadiusViewportFactor = defaultOptions.endRadiusViewportFactor;
+      } else {
+        opts.endRadiusViewportFactor = Math.max(0.1, Math.min(3.0, opts.endRadiusViewportFactor));
+        if (opts.endRadiusViewportFactor !== userOptions.endRadiusViewportFactor) {
+          console.warn(`BlobSectionReveal: 'endRadiusViewportFactor' capped to ${opts.endRadiusViewportFactor} (range: 0.1-3.0)`);
+        }
+      }
+    }
+
+    // Validate center coordinates (min: 0, max: 100)
+    if (opts.center !== undefined) {
+      if (typeof opts.center !== "object" || opts.center === null) {
+        console.warn("BlobSectionReveal: 'center' must be an object with x and y properties. Using default value.");
+        opts.center = defaultOptions.center;
+      } else {
+        const originalCenter = { ...opts.center };
+        opts.center.x = Math.max(0, Math.min(100, opts.center.x || 50));
+        opts.center.y = Math.max(0, Math.min(100, opts.center.y || 50));
+        
+        if (opts.center.x !== originalCenter.x || opts.center.y !== originalCenter.y) {
+          console.warn(`BlobSectionReveal: 'center' coordinates capped to {x: ${opts.center.x}, y: ${opts.center.y}} (range: 0-100)`);
+        }
+      }
+    }
+
+    // Validate morphPaths array length (max: 10 paths for performance)
+    if (opts.morphPaths !== undefined) {
+      if (!Array.isArray(opts.morphPaths)) {
+        console.warn("BlobSectionReveal: 'morphPaths' must be an array. Using default value.");
+        opts.morphPaths = defaultOptions.morphPaths;
+      } else if (opts.morphPaths.length > 10) {
+        console.warn(`BlobSectionReveal: 'morphPaths' limited to 10 paths for performance (provided: ${opts.morphPaths.length})`);
+        opts.morphPaths = opts.morphPaths.slice(0, 10);
+      }
+    }
+
+    return opts;
   }
 
   init(): void {
@@ -140,7 +206,6 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   // ───────────────────────────────────────────────────────────────────────────
   private setupDOM() {
     const section = this.getParentSection(this.container);
-    console.log('the section:', section);
     if (!section) throw new Error("BlobSectionReveal must be inside a <section>.");
 
     const wrapper = this.wrapSections(section);
@@ -212,22 +277,30 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
 
     const t = this.sampleEase(progress);
 
-    // Calculate radius to cover entire viewport diagonal
+    // Calculate radius needed to just cover the viewport diagonal
     const diagonal = Math.sqrt(window.innerWidth ** 2 + window.innerHeight ** 2);
-    const endR = diagonal * 0.6; // Ensure full coverage
-    const radiusPx = endR * t; // Start at 0, scale to full diagonal
+    
+    // Cap the end radius to just what's needed to cover the screen
+    const maxNeededRadius = diagonal * 0.7; // Slightly more than needed for full coverage
+    const radiusPx = maxNeededRadius * Math.min(t, 1); // Don't exceed what's needed
 
-    // For SVG blob: start at scale 0 (invisible), grow to large
-    // t ranges from 0 to 1, we want scale to go from 0 to large
-    const scale = 20.0 * t; // Start at 0 (invisible), grow to 20.0
+    // For SVG blob: scale more conservatively to avoid over-scaling
+    // Stop scaling aggressively once we've covered the viewport
+    const maxScale = Math.min(15.0, (diagonal / 50)); // Scale based on viewport size, max 15
+    const scale = maxScale * Math.min(t, 1); // Cap at 1 to prevent over-scaling
 
 
     this.sticky.style.setProperty("--bsr-progress", String(progress));
     this.sticky.style.setProperty("--bsr-progress-eased", String(t));
 
-    if (progress <= 0) {
+    // Check if blob has fully covered the viewport (early completion)
+    const viewportDiagonal = Math.sqrt(window.innerWidth ** 2 + window.innerHeight ** 2);
+    const isFullyCovered = radiusPx >= viewportDiagonal * 0.6;
+    const effectiveProgress = isFullyCovered ? 1 : progress;
+
+    if (effectiveProgress <= 0) {
       this.topSection.classList.remove("bsr-top--revealing", "bsr-top--done");
-    } else if (progress < 1) {
+    } else if (effectiveProgress < 1) {
       this.topSection.classList.add("bsr-top--revealing");
       this.topSection.classList.remove("bsr-top--done");
     } else {
