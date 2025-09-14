@@ -16,16 +16,16 @@ function formatPluginName(name) {
   // Convert to PascalCase (PluginName)
   const pascalCase = name.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : '')
     .replace(/^(.)/, c => c.toUpperCase());
-  
+
   // Convert to kebab-case (plugin-name)
   const kebabCase = name.replace(/([A-Z])/g, '-$1')
     .toLowerCase()
     .replace(/^-/, '')
     .replace(/[-_\s]+/g, '-');
-  
+
   // Convert to camelCase (pluginName)
   const camelCase = pascalCase.replace(/^(.)/, c => c.toLowerCase());
-  
+
   return { pascalCase, kebabCase, camelCase };
 }
 
@@ -44,8 +44,6 @@ import PluginBase from "../_PluginBase/model";
 import { PluginOptions } from "../_lib/ts/types";
 
 interface I${pascalCase}Options {
-  // Define your plugin options here
-  enabled?: boolean;
 }
 
 interface I${pascalCase} {
@@ -59,10 +57,15 @@ class ${pascalCase} extends PluginBase<I${pascalCase}Options> implements I${pasc
 
   constructor(container: HTMLElement, options: PluginOptions<I${pascalCase}Options> = {}) {
     super(container, '${pascalCase}');
-    this.options = {
-      enabled: true,
-      ...options
-    };
+    this.options = this.validateOptions(options);
+  }
+
+    protected validateOptions(
+    options: PluginOptions<IMagneticButtonOptions>
+  ): PluginOptions<IMagneticButtonOptions> {
+    const mergedOptions = this.mergeOptions(options, this.options);
+      
+    return mergedOptions;
   }
 
   init(): void {
@@ -104,7 +107,7 @@ export default ${pascalCase};
 function getStylesTemplate(kebabCase) {
   return `// Styles for ${kebabCase} plugin
 
-[data-candlelight-plugin-${kebabCase}] {
+[data-candlelight-${kebabCase}] {
   // Add your plugin styles here
   transition: all 0.3s ease;
   
@@ -125,25 +128,25 @@ function getStylesTemplate(kebabCase) {
 // Function to create plugin files
 function createPluginFiles(pluginName, pluginDir) {
   const { pascalCase, kebabCase } = formatPluginName(pluginName);
-  
+
   // Create main directories
   const assetsDir = path.join(pluginDir, 'assets');
   const stylesDir = path.join(assetsDir, 'styles');
-  
+
   ensureDir(pluginDir);
   ensureDir(assetsDir);
   ensureDir(stylesDir);
-  
+
   // Create model.ts
   const modelPath = path.join(pluginDir, 'model.ts');
   fs.writeFileSync(modelPath, getModelTemplate(pascalCase, kebabCase));
   console.log(`📄 Created: ${modelPath}`);
-  
+
   // Create main.scss
   const stylesPath = path.join(stylesDir, 'main.scss');
   fs.writeFileSync(stylesPath, getStylesTemplate(kebabCase));
   console.log(`📄 Created: ${stylesPath}`);
-  
+
   return { pascalCase, kebabCase };
 }
 
@@ -152,7 +155,7 @@ function generatePluginPassword() {
   // Generate two UUIDs and concatenate them for extra security
   const uuid1 = uuidv4().replace(/-/g, ''); // Remove hyphens
   const uuid2 = uuidv4().replace(/-/g, ''); // Remove hyphens
-  
+
   // Combine and take first 28 characters (less than 30)
   return (uuid1 + uuid2).substring(0, 28);
 }
@@ -160,7 +163,7 @@ function generatePluginPassword() {
 // Function to generate RTF install guide
 function generateInstallGuideRTF(displayName, slug, password) {
   const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}\n\\f0\\fs24\\qc\\b ${displayName} by Candlelight Plugins\\b0\\par\n\\par\n\\b Plugin Install Guide:\\b0\\par\n{\\field{\\*\\fldinst HYPERLINK "https://candlelightplugins.com/${slug}"}{\\fldrslt https://candlelightplugins.com/${slug}}}\\par\n\\par\n\\b Password:\\b0\\par\n${password}\\par\n\\par\n\\b Happy designing and coding!\\b0\\par\n\\par\n\\b The Candlelight Plugins Team\\b0\\par\n}`;
-  
+
   return Buffer.from(rtfContent, 'utf8');
 }
 
@@ -225,7 +228,7 @@ async function createPlugin() {
     });
 
     const { pascalCase, kebabCase } = formatPluginName(pluginName);
-    
+
     // Determine tree config
     let treeConfig = null;
     const tc = String(treeConfigChoice || '').trim().toLowerCase();
@@ -246,7 +249,7 @@ async function createPlugin() {
 
     // Determine supported platforms
     let supportedPlatforms = ['desktop']; // default
-    switch(platformsInput) {
+    switch (platformsInput) {
       case '1':
         supportedPlatforms = ['desktop', 'mobile', 'tablet'];
         break;
@@ -268,35 +271,35 @@ async function createPlugin() {
       default:
         supportedPlatforms = ['desktop'];
     }
-    
+
     console.log(`\n🚀 Creating plugin: ${pascalCase}`);
     console.log(`📂 Slug: ${kebabCase}`);
-    
+
     // Create plugin directory and files
     const pluginsDir = path.join(__dirname, '../src/plugins');
     const pluginDir = path.join(pluginsDir, pascalCase);
-    
+
     if (fs.existsSync(pluginDir)) {
       console.log(`❌ Plugin directory already exists: ${pluginDir}`);
       process.exit(1);
     }
-    
+
     const formats = createPluginFiles(pluginName, pluginDir);
-    
+
     // Generate a secure UUID-based password for the plugin
     const pluginPassword = generatePluginPassword();
-    
+
     // Generate RTF install guide
     const installGuideRTF = generateInstallGuideRTF(pluginName.trim(), kebabCase, pluginPassword);
-    
+
     // Create downloads directory and save RTF file
     const downloadsDir = path.join(pluginDir, 'assets', 'downloads');
     ensureDir(downloadsDir);
-    
+
     const rtfFilePath = path.join(downloadsDir, `${kebabCase}-install-guide.rtf`);
     fs.writeFileSync(rtfFilePath, installGuideRTF);
     console.log(`📄 Created: ${rtfFilePath}`);
-    
+
     // Prepare MongoDB data
     const pluginData = {
       name: pascalCase,
@@ -311,11 +314,11 @@ async function createPlugin() {
       squarespaceVersions: ['7.1'],
       isActive: true
     };
-    
+
     // Register in MongoDB
     console.log('\n📡 Registering plugin in MongoDB...');
     const createdPlugin = await registerPluginInMongoDB(pluginData);
-    
+
     console.log(`\n✅ Plugin "${pascalCase}" created successfully!`);
     console.log(`🔐 Plugin Password: ${pluginPassword}`);
     console.log('   ⚠️  Save this password securely - it cannot be recovered!');
@@ -325,7 +328,7 @@ async function createPlugin() {
     console.log('   3. Run `npm run build` to compile your plugin');
     console.log('   4. Test your plugin on a website');
     console.log(`\n🎯 Plugin will be available at: /plugins/${kebabCase}/bundle.js`);
-    
+
   } catch (error) {
     console.error('❌ Error creating plugin:', error.message);
     process.exit(1);

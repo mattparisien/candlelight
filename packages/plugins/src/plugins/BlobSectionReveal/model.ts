@@ -14,6 +14,7 @@ export interface IBlobSectionRevealOptions extends ClipPathOptions {
   startRadiusPx?: number; // initial radial hole (px)
   endRadiusViewportFactor?: number; // final radius factor vs min viewport dimension
   smoothing?: number; // 0 disables smoothing, 0-1 lerp factor per frame
+  morphPaths?: string[]; // Array of SVG paths to morph between during scroll
 }
 
 
@@ -31,6 +32,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     "svgPath",
     "center",
     "smoothing",
+    "morphPaths",
   ];
 
   private options: PluginOptions<IBlobSectionRevealOptions>;
@@ -60,6 +62,11 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
       center: { x: 50, y: 50 },
       smoothing: 0.15,
       svgPath: "M49.3,-18.8C53.6,-2.9,39.6,16.2,25.9,23.3C12.1,30.4,-1.4,25.4,-19.3,15.1C-37.3,4.8,-59.6,-10.9,-57.1,-24.4C-54.6,-37.9,-27.3,-49.2,-2.4,-48.4C22.5,-47.6,45,-34.8,49.3,-18.8Z",
+      morphPaths: [
+        "M49.3,-18.8C53.6,-2.9,39.6,16.2,25.9,23.3C12.1,30.4,-1.4,25.4,-19.3,15.1C-37.3,4.8,-59.6,-10.9,-57.1,-24.4C-54.6,-37.9,-27.3,-49.2,-2.4,-48.4C22.5,-47.6,45,-34.8,49.3,-18.8Z",
+        "M63.4,-24.1C68.9,-3.8,50.8,20.6,29,35.4C7.1,50.2,-18.5,55.5,-34.6,44.5C-50.7,33.5,-57.3,6.4,-50,-16.5C-42.6,-39.5,-21.3,-58.2,3.8,-59.4C29,-60.7,58,-44.5,63.4,-24.1Z",
+        "M44,-17C51.6,9.2,48.6,36,33.9,46.8C19.1,57.6,-7.5,52.3,-26.3,38.2C-45,24.1,-55.9,1.2,-50.2,-22.3C-44.5,-45.9,-22.3,-70,-2,-69.3C18.2,-68.7,36.3,-43.2,44,-17Z"
+      ],
       ...options,
     };
   }

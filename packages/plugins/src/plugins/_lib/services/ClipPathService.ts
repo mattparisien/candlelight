@@ -1,6 +1,7 @@
 export interface ClipPathOptions {
   svgPath?: string;
   center?: { x: number; y: number };
+  morphPaths?: string[];
 }
 
 export default class ClipPathService {
@@ -10,6 +11,7 @@ export default class ClipPathService {
   private topSection!: HTMLElement;
   private opt: Required<Pick<ClipPathOptions, "center">> & ClipPathOptions;
   private _clipPathId = `bsr-clippath-${Math.random().toString(36).slice(2)}`;
+  private morphPaths: string[] = [];
 
   constructor(topSection: HTMLElement, options: ClipPathOptions) {
     this.topSection = topSection;
@@ -17,6 +19,7 @@ export default class ClipPathService {
       center: options.center || { x: 50, y: 50 },
       ...options,
     };
+    this.morphPaths = options.morphPaths || [];
   }
 
   mount() {
@@ -61,6 +64,12 @@ export default class ClipPathService {
 
   update(progress: number, radiusPx: number, scale: number) {
     if (this.usesSvg && this.pathEl) {
+      // Handle morphing between paths if available
+      if (this.morphPaths.length > 1) {
+        const morphedPath = this.interpolatePaths(progress);
+        this.pathEl.setAttribute("d", morphedPath);
+      }
+
       // Position the blob at center of viewport and scale from its own center
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
@@ -87,5 +96,115 @@ export default class ClipPathService {
     }
     this.topSection.style.clipPath = '';
     this.topSection.classList.remove("bsr-top--use-svg-clippath", "bsr-top--use-radial-clippath");
+  }
+
+  private interpolatePaths(progress: number): string {
+    if (this.morphPaths.length < 2) {
+      return this.morphPaths[0] || "";
+    }
+
+    const numPaths = this.morphPaths.length;
+    
+    if (progress <= 0) return this.morphPaths[0];
+    if (progress >= 1) return this.morphPaths[numPaths - 1];
+
+    // Calculate which two paths to interpolate between
+    const scaledProgress = progress * (numPaths - 1);
+    const fromIndex = Math.floor(scaledProgress);
+    const toIndex = Math.min(fromIndex + 1, numPaths - 1);
+    const localProgress = scaledProgress - fromIndex;
+
+    return this.interpolateTwoPaths(
+      this.morphPaths[fromIndex],
+      this.morphPaths[toIndex],
+      localProgress
+    );
+  }
+
+  private interpolateTwoPaths(pathA: string, pathB: string, t: number): string {
+    // Parse both paths into command arrays
+    const commandsA = this.parsePath(pathA);
+    const commandsB = this.parsePath(pathB);
+
+    // Normalize paths to have same number of commands
+    const [normalizedA, normalizedB] = this.normalizePaths(commandsA, commandsB);
+
+    // Interpolate between normalized paths
+    const interpolatedCommands = normalizedA.map((cmdA, index) => {
+      const cmdB = normalizedB[index];
+      return this.interpolateCommand(cmdA, cmdB, t);
+    });
+
+    // Convert back to path string
+    return this.commandsToPath(interpolatedCommands);
+  }
+
+  private parsePath(pathString: string): Array<{type: string, coords: number[]}> {
+    const commands: Array<{type: string, coords: number[]}> = [];
+    const regex = /([MmLlHhVvCcSsQqTtAaZz])([^MmLlHhVvCcSsQqTtAaZz]*)/g;
+    let match;
+
+    while ((match = regex.exec(pathString)) !== null) {
+      const type = match[1];
+      const coordsStr = match[2].trim();
+      const coords = coordsStr ? coordsStr.split(/[\s,]+/).map(Number).filter(n => !isNaN(n)) : [];
+      
+      commands.push({ type, coords });
+    }
+
+    return commands;
+  }
+
+  private normalizePaths(pathA: Array<{type: string, coords: number[]}>, pathB: Array<{type: string, coords: number[]}>): [Array<{type: string, coords: number[]}>, Array<{type: string, coords: number[]}>] {
+    const maxLength = Math.max(pathA.length, pathB.length);
+    
+    const normalizedA = [...pathA];
+    const normalizedB = [...pathB];
+
+    // Pad shorter path by repeating last command
+    while (normalizedA.length < maxLength) {
+      const lastCmd = normalizedA[normalizedA.length - 1];
+      normalizedA.push({ ...lastCmd });
+    }
+
+    while (normalizedB.length < maxLength) {
+      const lastCmd = normalizedB[normalizedB.length - 1];
+      normalizedB.push({ ...lastCmd });
+    }
+
+    // Ensure matching coordinate array lengths
+    for (let i = 0; i < maxLength; i++) {
+      const cmdA = normalizedA[i];
+      const cmdB = normalizedB[i];
+      const maxCoords = Math.max(cmdA.coords.length, cmdB.coords.length);
+
+      // Pad coordinate arrays
+      while (cmdA.coords.length < maxCoords) {
+        cmdA.coords.push(cmdA.coords[cmdA.coords.length - 1] || 0);
+      }
+      while (cmdB.coords.length < maxCoords) {
+        cmdB.coords.push(cmdB.coords[cmdB.coords.length - 1] || 0);
+      }
+    }
+
+    return [normalizedA, normalizedB];
+  }
+
+  private interpolateCommand(cmdA: {type: string, coords: number[]}, cmdB: {type: string, coords: number[]}, t: number): {type: string, coords: number[]} {
+    const type = cmdA.type;
+    
+    const coords = cmdA.coords.map((coordA, index) => {
+      const coordB = cmdB.coords[index] || coordA;
+      return coordA + (coordB - coordA) * t;
+    });
+
+    return { type, coords };
+  }
+
+  private commandsToPath(commands: Array<{type: string, coords: number[]}>): string {
+    return commands.map(cmd => {
+      const coordsStr = cmd.coords.map(n => n.toFixed(3)).join(' ');
+      return `${cmd.type}${coordsStr}`;
+    }).join('');
   }
 }
