@@ -67,8 +67,9 @@ export default class ClipPathService {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
       
-      // Convert scale (1-21) to reasonable pixel scale for the blob
-      const pixelScale = scale * 2; // Adjust this multiplier as needed
+      // Convert scale (0-20) to reasonable pixel scale for the blob
+      // At scale 0, blob is invisible; at scale 20, blob covers viewport
+      const pixelScale = scale * 2; // Scale 0-40 range
       
       this.pathEl.setAttribute(
         "transform",

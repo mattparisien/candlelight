@@ -205,9 +205,9 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     const endR = diagonal * 0.6; // Ensure full coverage
     const radiusPx = endR * t; // Start at 0, scale to full diagonal
     
-    // For SVG blob: start small but visible, scale to large
-    // t ranges from 0 to 1, we want scale to go from small to large
-    const scale = 1.0 + 20.0 * t; // Start at 1.0 (visible), grow to 21.0
+    // For SVG blob: start at scale 0 (invisible), grow to large
+    // t ranges from 0 to 1, we want scale to go from 0 to large
+    const scale = 20.0 * t; // Start at 0 (invisible), grow to 20.0
 
 
     this.sticky.style.setProperty("--bsr-progress", String(progress));
