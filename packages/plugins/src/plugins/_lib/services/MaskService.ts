@@ -33,19 +33,20 @@ export default class MaskService {
       const mask = document.createElementNS(svgNS, "mask");
       mask.setAttribute("id", this._maskId);
 
+      // For blob reveal: black background (hidden), white blob path (visible)
       const rect = document.createElementNS(svgNS, "rect");
       rect.setAttribute("x", "0");
       rect.setAttribute("y", "0");
       rect.setAttribute("width", "100%");
       rect.setAttribute("height", "100%");
-      rect.setAttribute("fill", "white");
+      rect.setAttribute("fill", "black");
 
       const g = document.createElementNS(svgNS, "g");
       g.setAttribute("class", "bsr-mask-group");
 
       this.pathEl = document.createElementNS(svgNS, "path");
       this.pathEl.setAttribute("d", this.opt.svgPath);
-      this.pathEl.setAttribute("fill", "black");
+      this.pathEl.setAttribute("fill", "white");
       this.pathEl.setAttribute("transform-origin", `${this.opt.center.x}% ${this.opt.center.y}%`);
 
       g.appendChild(this.pathEl);

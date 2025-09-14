@@ -2,13 +2,13 @@ import PluginBase from "../_PluginBase/model";
 import { PluginOptions } from "../_lib/ts/types";
 import ScrollProgressService from "../_lib/services/ScrollProgressService";
 import StickyService from "../_lib/services/StickyService";
-import MaskService, { MaskOptions } from "../_lib/services/MaskService";
+import ClipPathService, { ClipPathOptions } from "../_lib/services/ClipPathService";
 import DomUtils from "../_lib/utils/DomUtils";
 import { HTML_SELECTOR_MAP } from "../_lib/config/domMappings";
 import AnimationFrameService from "../_lib/services/AnimationFrameService";
 
 
-export interface IBlobSectionRevealOptions extends MaskOptions {
+export interface IBlobSectionRevealOptions extends ClipPathOptions {
   durationVh?: number; // pin duration in viewport heights
   easing?: string; // 'linear' | 'ease-in' | 'ease-out' (simple keywords)
   startRadiusPx?: number; // initial radial hole (px)
@@ -40,7 +40,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
 
   private scrollSvc!: ScrollProgressService;
   private stickySvc!: StickyService;
-  private maskSvc!: MaskService;
+  private clipPathSvc!: ClipPathService;
   private resizeObserver?: ResizeObserver;
   private afSvc?: AnimationFrameService;
 
@@ -59,6 +59,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
       endRadiusViewportFactor: 0.9,
       center: { x: 50, y: 50 },
       smoothing: 0.15,
+      svgPath: "M49.3,-18.8C53.6,-2.9,39.6,16.2,25.9,23.3C12.1,30.4,-1.4,25.4,-19.3,15.1C-37.3,4.8,-59.6,-10.9,-57.1,-24.4C-54.6,-37.9,-27.3,-49.2,-2.4,-48.4C22.5,-47.6,45,-34.8,49.3,-18.8Z",
       ...options,
     };
   }
@@ -88,8 +89,8 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     this.stickySvc = new StickyService(this.container, durationVh);
     this.stickySvc.applyBaseLayout();
 
-    this.maskSvc = new MaskService(this.topSection, this.options as MaskOptions);
-    this.maskSvc.mount();
+    this.clipPathSvc = new ClipPathService(this.topSection, this.options as ClipPathOptions);
+    this.clipPathSvc.mount();
 
     this.scrollSvc = new ScrollProgressService((p) => this.setTargetProgress(p));
     this.computeRanges();
@@ -109,7 +110,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   destroy(): void {
     this.scrollSvc?.detach();
     this.resizeObserver?.disconnect();
-    this.maskSvc?.unmount();
+    this.clipPathSvc?.unmount();
     this.afSvc?.stopAnimation();
 
     this.container.classList.remove("bsr-container");
@@ -203,7 +204,10 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     const diagonal = Math.sqrt(window.innerWidth ** 2 + window.innerHeight ** 2);
     const endR = diagonal * 0.6; // Ensure full coverage
     const radiusPx = endR * t; // Start at 0, scale to full diagonal
-    const scale = 0.1 + 3.0 * t; // used for SVG-path blob
+    
+    // For SVG blob: start small but visible, scale to large
+    // t ranges from 0 to 1, we want scale to go from small to large
+    const scale = 1.0 + 20.0 * t; // Start at 1.0 (visible), grow to 21.0
 
 
     this.sticky.style.setProperty("--bsr-progress", String(progress));
@@ -219,7 +223,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
       this.topSection.classList.remove("bsr-top--revealing");
     }
 
-    this.maskSvc.update(progress, radiusPx, scale);
+    this.clipPathSvc.update(progress, radiusPx, scale);
   }
 
   private sampleEase(t: number): number {
