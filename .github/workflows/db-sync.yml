@@ -51,15 +51,8 @@ jobs:
             const result = JSON.parse(fs.readFileSync(syncResultPath, 'utf8'));
             
             if (result.changes && result.changes.length > 0) {
-              const body = `## 🔄 Database Sync Report
-              
-**Changes Applied:**
-${result.changes.map(change => `- ${change.type}: ${change.description}`).join('\n')}
-
-**Total Changes:** ${result.changes.length}
-**Sync Status:** ${result.status}
-**Timestamp:** ${result.timestamp}
-              `;
+              const changesList = result.changes.map(change => `- ${change.type}: ${change.description}`).join('\n');
+              const body = `## 🔄 Database Sync Report\n\n**Changes Applied:**\n${changesList}\n\n**Total Changes:** ${result.changes.length}\n**Sync Status:** ${result.status}\n**Timestamp:** ${result.timestamp}`;
               
               github.rest.issues.createComment({
                 issue_number: context.issue.number || 1,
