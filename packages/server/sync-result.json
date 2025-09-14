@@ -1,0 +1,42 @@
+{
+  "status": "success",
+  "timestamp": "2025-09-14T12:21:42.295Z",
+  "changes": [
+    {
+      "type": "INSERT",
+      "description": "New plugin: TextShuffle",
+      "pluginName": "TextShuffle"
+    },
+    {
+      "type": "INSERT",
+      "description": "New plugin: BlobSectionReveal",
+      "pluginName": "BlobSectionReveal"
+    },
+    {
+      "type": "UPDATE",
+      "description": "Update plugin: MouseFollower",
+      "pluginName": "MouseFollower"
+    },
+    {
+      "type": "UPDATE",
+      "description": "Update plugin: MagneticButton",
+      "pluginName": "MagneticButton"
+    },
+    {
+      "type": "UPDATE",
+      "description": "Update plugin: LayeredSections",
+      "pluginName": "LayeredSections"
+    },
+    {
+      "type": "UPDATE",
+      "description": "Update plugin: ImageTrailer",
+      "pluginName": "ImageTrailer"
+    }
+  ],
+  "summary": {
+    "inserted": 2,
+    "updated": 4,
+    "deleted": 2
+  },
+  "dryRun": false
+}

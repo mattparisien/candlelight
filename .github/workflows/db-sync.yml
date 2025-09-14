@@ -1,0 +1,71 @@
+name: Database Sync on Master Deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no actual changes)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  database-diff-sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        cd packages/server
+        npm install
+        
+    - name: Run Database Diff and Sync
+      env:
+        DEV_MONGODB_URI: ${{ secrets.DEV_MONGODB_URI }}
+        PROD_MONGODB_URI: ${{ secrets.PROD_MONGODB_URI }}
+        DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+      run: |
+        cd packages/server
+        node scripts/db-sync.js
+        
+    - name: Create PR Comment (if changes made)
+      if: success()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const syncResultPath = 'packages/server/sync-result.json';
+          
+          if (fs.existsSync(syncResultPath)) {
+            const result = JSON.parse(fs.readFileSync(syncResultPath, 'utf8'));
+            
+            if (result.changes && result.changes.length > 0) {
+              const body = `## 🔄 Database Sync Report
+              
+**Changes Applied:**
+${result.changes.map(change => `- ${change.type}: ${change.description}`).join('\n')}
+
+**Total Changes:** ${result.changes.length}
+**Sync Status:** ${result.status}
+**Timestamp:** ${result.timestamp}
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number || 1,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }
+          }

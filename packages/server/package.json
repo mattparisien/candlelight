@@ -9,13 +9,21 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy:railway": "railway up",
     "deploy:render": "echo 'Push to GitHub - Render will auto-deploy'",
-    "domains:add": "node scripts/manage-domains.js add",
-    "domains:list": "node scripts/manage-domains.js list",
+    "domains:add": "node scripts/manage-domains.js add --env=dev",
+    "domains:add:dev": "node scripts/manage-domains.js add --env=dev",
+    "domains:add:prod": "node scripts/manage-domains.js add --env=prod",
+    "domains:list": "node scripts/manage-domains.js list --env=dev",
+    "domains:list:dev": "node scripts/manage-domains.js list --env=dev",
+    "domains:list:prod": "node scripts/manage-domains.js list --env=prod",
     "domains:migrate": "node scripts/migrate-domains.js",
     "domains:seed": "node scripts/seed-domains.js",
     "plugins:seed": "node scripts/seed-plugins.js",
     "plugins:add-passwords": "node scripts/add-passwords-to-plugins.js",
-    "plugins:activate": "node scripts/activate-plugins.js"
+    "plugins:activate": "node scripts/activate-plugins.js",
+    "db:sync": "node scripts/db-sync.js",
+    "db:sync:dry-run": "DRY_RUN=true node scripts/db-sync.js",
+    "db:trigger-sync": "node scripts/trigger-sync.js",
+    "db:trigger-sync:dry-run": "node scripts/trigger-sync.js --dry-run"
   },
   "keywords": [
     "authentication",
@@ -27,7 +35,7 @@
   "description": "Authentication server for Squarespace plugins",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "mongoose": "^8.18.0",

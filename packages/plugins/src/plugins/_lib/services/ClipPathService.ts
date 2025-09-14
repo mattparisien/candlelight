@@ -121,17 +121,6 @@ export default class ClipPathService {
     const toIndex = Math.min(fromIndex + 1, numPaths - 1);
     const localProgress = scaledProgress - fromIndex;
     
-    console.log('Interpolating paths:', { 
-      originalProgress: progress, 
-      morphProgress, 
-      morphCompletionPercentage, 
-      scaledProgress, 
-      fromIndex, 
-      toIndex, 
-      localProgress, 
-      numPaths 
-    });
-
     return this.interpolateTwoPaths(
       this.morphPaths[fromIndex],
       this.morphPaths[toIndex],

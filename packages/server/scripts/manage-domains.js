@@ -2,12 +2,62 @@
 
 const mongoose = require('mongoose');
 const readline = require('readline');
+const path = require('path');
 const AuthorizedDomain = require('../models/AuthorizedDomain');
 const Setting = require('../models/Setting');
 const Plugin = require('../models/Plugin');
 require('dotenv').config();
 
-const MONGODB_URI = process.env.MONGODB_URI
+// Load environment variables from .env.sync file
+function loadEnvFromFile() {
+  try {
+    const envPath = path.join(__dirname, '..', '.env.sync');
+    const envFile = require('fs').readFileSync(envPath, 'utf8');
+    
+    envFile.split('\n').forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+        const [key, ...valueParts] = trimmed.split('=');
+        const value = valueParts.join('=');
+        if (!process.env[key]) {
+          process.env[key] = value;
+        }
+      }
+    });
+  } catch (error) {
+    console.log('⚠️  Could not load .env.sync file:', error.message);
+  }
+}
+
+// Parse environment flag from command line arguments
+function parseEnvironment() {
+  const envArg = process.argv.find(arg => arg.startsWith('--env='));
+  const environment = envArg ? envArg.split('=')[1] : 'dev';
+  
+  // Validate environment
+  if (!['dev', 'prod'].includes(environment)) {
+    console.error('❌ Invalid environment. Use --env=dev or --env=prod');
+    process.exit(1);
+  }
+  
+  return environment;
+}
+
+// Get MongoDB URI based on environment
+function getMongoURI(environment) {
+  loadEnvFromFile();
+  
+  const envKey = environment === 'prod' ? 'PROD_MONGODB_URI' : 'DEV_MONGODB_URI';
+  const mongoUri = process.env[envKey] || process.env.MONGODB_URI;
+  
+  if (!mongoUri) {
+    console.error(`❌ MongoDB URI not found for environment: ${environment}`);
+    console.error(`   Expected environment variable: ${envKey}`);
+    process.exit(1);
+  }
+  
+  return mongoUri;
+}
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -20,10 +70,11 @@ function askQuestion(question) {
   });
 }
 
-async function addDomain() {
+async function addDomain(environment) {
   try {
-    await mongoose.connect(MONGODB_URI);
-    console.log('🔗 Connected to MongoDB\n');
+    const mongoUri = getMongoURI(environment);
+    await mongoose.connect(mongoUri);
+    console.log(`🔗 Connected to MongoDB (${environment.toUpperCase()} environment)\n`);
     
     // Ensure collections exist (creates them if they don't exist)
     await AuthorizedDomain.createCollection().catch(() => {}); // Ignore error if collection exists
@@ -175,10 +226,11 @@ async function addDomain() {
   }
 }
 
-async function listDomains() {
+async function listDomains(environment) {
   try {
-    await mongoose.connect(MONGODB_URI);
-    console.log('🔗 Connected to MongoDB\n');
+    const mongoUri = getMongoURI(environment);
+    await mongoose.connect(mongoUri);
+    console.log(`🔗 Connected to MongoDB (${environment.toUpperCase()} environment)\n`);
     
     // Ensure collections exist (creates them if they don't exist)
     await AuthorizedDomain.createCollection().catch(() => {}); // Ignore error if collection exists
@@ -226,25 +278,32 @@ async function listDomains() {
 // Command line interface
 async function main() {
   const command = process.argv[2];
+  const environment = parseEnvironment();
 
   if (!command) {
     console.log('🔐 Domain Management Tool\n');
-    console.log('Usage: node manage-domains.js <command>\n');
+    console.log('Usage: node manage-domains.js <command> [--env=<environment>]\n');
     console.log('Commands:');
     console.log('  add  - Add a new authorized domain');
     console.log('  list - List all authorized domains\n');
+    console.log('Environment Options:');
+    console.log('  --env=dev  - Use development database (default)');
+    console.log('  --env=prod - Use production database\n');
     console.log('Examples:');
-    console.log('  node manage-domains.js add');
-    console.log('  node manage-domains.js list');
+    console.log('  node manage-domains.js add --env=dev');
+    console.log('  node manage-domains.js add --env=prod');
+    console.log('  node manage-domains.js list --env=dev');
     process.exit(0);
   }
 
+  console.log(`🌍 Environment: ${environment.toUpperCase()}`);
+
   switch (command) {
     case 'add':
-      await addDomain();
+      await addDomain(environment);
       break;
     case 'list':
-      await listDomains();
+      await listDomains(environment);
       break;
     default:
       console.log('❌ Unknown command. Use "add" or "list"');

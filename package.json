@@ -25,7 +25,11 @@
     "deploy:railway": "npm run deploy:railway --workspace=packages/server",
     "deploy:render": "npm run deploy:render --workspace=packages/server",
     "domains:add": "npm run domains:add --workspace=packages/server",
+    "domains:add:dev": "npm run domains:add:dev --workspace=packages/server",
+    "domains:add:prod": "npm run domains:add:prod --workspace=packages/server",
     "domains:list": "npm run domains:list --workspace=packages/server",
+    "domains:list:dev": "npm run domains:list:dev --workspace=packages/server",
+    "domains:list:prod": "npm run domains:list:prod --workspace=packages/server",
     "lint": "echo 'Add linting setup here'",
     "test": "echo 'Add testing setup here'"
   },
