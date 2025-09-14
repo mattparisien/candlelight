@@ -103,7 +103,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
 
     this.scrollSvc = new ScrollProgressService((p) => this.setTargetProgress(p));
     this.computeRanges();
-    this.scrollSvc.attach();
+    this.scrollSvc.attach(); 
 
     this.resizeObserver = new ResizeObserver(() => this.computeRanges());
     this.resizeObserver.observe(document.documentElement);
