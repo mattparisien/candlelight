@@ -118,7 +118,6 @@ export async function initializePlugin(pluginName: string): Promise<void> {
           `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`
         );
 
-      console.log('Plugin configuration:', plugin);
       // Check device compatibility
       if (plugin.supportedPlatforms && plugin.supportedPlatforms.length > 0) {
         const deviceType = DeviceService.getDeviceType();

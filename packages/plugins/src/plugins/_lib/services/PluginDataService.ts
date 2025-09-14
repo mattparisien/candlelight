@@ -58,8 +58,6 @@ class PluginDataService {
         module: this.createModuleLoader(plugin.name)
       }));
 
-      console.log(`Loaded ${this.plugins.length} plugins from server:`, this.plugins.map(p => p.displayName));
-
       return this.plugins;
     } catch (error) {
       console.error('Error fetching plugins:', error);
