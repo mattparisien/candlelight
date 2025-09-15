@@ -78,7 +78,7 @@
   // Helpful defaults for sections (can be overridden by site styles)
   [data-candlelight-blob-section-reveal] {
     .page-section {
-      height: 100vh;
+      min-height: 100vh !important;
     }
 
     & > .bsr-sticky > * {
