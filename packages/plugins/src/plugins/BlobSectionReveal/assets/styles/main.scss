@@ -1,13 +1,4 @@
-[data-candlelight-sqsp-env="DEV"] {
-  .page-section {
-    width: 100vw;
-    height: 100vh;
-  }
-}
-
-[data-candlelight-sqsp-env="PREVIEW"],
-[data-candlelight-sqsp-env="PROD"],
-[data-candlelight-sqsp-env="DEV"] {
+[data-candlelight-initialized="true"] {
   .page-section {
     font-size: 4vw;
     color: black;
