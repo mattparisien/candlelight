@@ -220,7 +220,7 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     const rect = this.container.getBoundingClientRect();
     const start = window.scrollY + rect.top;
     // Always use 1 viewport height (100vh) for scroll distance
-    const end = start + window.innerHeight;
+    const end = start + window.innerHeight / 2;
 
     this.scrollSvc.setRange(start, end);
 
