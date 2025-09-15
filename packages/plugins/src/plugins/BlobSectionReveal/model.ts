@@ -9,7 +9,6 @@ import AnimationFrameService from "../_lib/services/AnimationFrameService";
 
 
 export interface IBlobSectionRevealOptions extends ClipPathOptions {
-  durationVh?: number; // pin duration in viewport heights
   easing?: string; // 'linear' | 'ease-in' | 'ease-out' (simple keywords)
   startRadiusPx?: number; // initial radial hole (px)
   endRadiusViewportFactor?: number; // final radius factor vs min viewport dimension
@@ -25,7 +24,6 @@ export interface IBlobSectionReveal {
 
 class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements IBlobSectionReveal {
   protected allowedOptions: (keyof IBlobSectionRevealOptions)[] = [
-    "durationVh",
     "easing",
     "startRadiusPx",
     "endRadiusViewportFactor",
@@ -55,7 +53,6 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
     super(container, "BlobSectionReveal");
 
     this.options = {
-      durationVh: 0.6, // Reduced from 1 to 0.6 to complete animation faster
       easing: "ease-out",
       startRadiusPx: 40,
       endRadiusViewportFactor: 0.9,
@@ -75,19 +72,6 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
 
   protected validateOptions(userOptions: Partial<PluginOptions<IBlobSectionRevealOptions>>, defaultOptions: PluginOptions<IBlobSectionRevealOptions>): void | PluginOptions<IBlobSectionRevealOptions> {
     const opts = { ...defaultOptions, ...userOptions };
-
-    // Validate and cap durationVh (min: 0.1, max: 5.0)
-    if (opts.durationVh !== undefined) {
-      if (typeof opts.durationVh !== "number" || Number.isNaN(opts.durationVh)) {
-        console.warn("BlobSectionReveal: 'durationVh' must be a number. Using default value.");
-        opts.durationVh = defaultOptions.durationVh;
-      } else {
-        opts.durationVh = Math.max(0.1, Math.min(5.0, opts.durationVh));
-        if (opts.durationVh !== userOptions.durationVh) {
-          console.warn(`BlobSectionReveal: 'durationVh' capped to ${opts.durationVh} (range: 0.1-5.0)`);
-        }
-      }
-    }
 
     // Validate and cap smoothing (min: 0, max: 1)
     if (opts.smoothing !== undefined) {
@@ -160,8 +144,8 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
 
   init(): void {
     this.setupDOM();
-    const durationVh = this.options.durationVh ?? 1;
-    this.stickySvc = new StickyService(this.container, durationVh);
+    // Always use 1 viewport height (100vh) for scroll distance
+    this.stickySvc = new StickyService(this.container, 1);
     this.stickySvc.applyBaseLayout();
 
     this.clipPathSvc = new ClipPathService(this.bottomSection, this.options as ClipPathOptions);
@@ -235,7 +219,8 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   private computeRanges() {
     const rect = this.container.getBoundingClientRect();
     const start = window.scrollY + rect.top;
-    const end = start + (this.options.durationVh! * window.innerHeight);
+    // Always use 1 viewport height (100vh) for scroll distance
+    const end = start + window.innerHeight;
 
     this.scrollSvc.setRange(start, end);
 
@@ -335,4 +320,5 @@ export default BlobSectionReveal;
 //   <section>Bottom</section>
 // </div>
 // 3) Init:
-// new BlobSectionReveal(document.getElementById('container')!, { durationVh: 1 });
+// new BlobSectionReveal(document.getElementById('container')!, { easing: 'ease-out' });
+// Note: Scroll distance is always 100vh (one viewport height)
