@@ -191,20 +191,199 @@ export async function initializePlugin(pluginName: string): Promise<void> {
   });
 }
 
+// Singleton class to manage all Squarespace environment and plugin lifecycle
+class SquarespaceEnvironmentManager {
+  private static instance: SquarespaceEnvironmentManager | null = null;
+  private observer: MutationObserver | null = null;
+  private isInitialized = false;
+  private allPluginInstances = new Map<string, any[]>(); // pluginName -> instances[]
+  private pluginInitializers = new Map<string, () => Promise<void>>(); // pluginName -> initializer function
+  private currentEnvironment: string = 'PROD';
+
+  private constructor() {}
+
+  static getInstance(): SquarespaceEnvironmentManager {
+    if (!SquarespaceEnvironmentManager.instance) {
+      SquarespaceEnvironmentManager.instance = new SquarespaceEnvironmentManager();
+    }
+    return SquarespaceEnvironmentManager.instance;
+  }
+
+  // Set Squarespace environment attribute on HTML document
+  private setSqspEnvironmentAttribute(): void {
+    let environment = 'PROD'; // Default to production
+    
+    // Check for editing state (remove the '.' prefix for class checking)
+    const editingClass = SQSP_ENV_SELECTOR_MAP.get("EDITING");
+    if (editingClass && document.body.classList.contains(editingClass.replace('.', ''))) {
+      environment = 'EDITING';
+    } else {
+      // Check for preview state
+      const hasEditMode = document.body.classList.contains('sqs-edit-mode');
+      const hasPageEditing = document.body.classList.contains('sqs-is-page-editing');
+      
+      if (hasEditMode && !hasPageEditing) {
+        environment = 'PREVIEW';
+      }
+    }
+    
+    this.currentEnvironment = environment;
+    document.documentElement.setAttribute('data-candlelight-sqsp-env', environment);
+  }
+
+  // Initialize the global observer (only once)
+  private initializeGlobalObserver(): void {
+    if (this.isInitialized) {
+      return; // Already initialized
+    }
+
+    this.setSqspEnvironmentAttribute(); // Set initial environment
+
+    // Set up MutationObserver to watch for class changes on body
+    this.observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const previousEnvironment = this.currentEnvironment;
+          this.setSqspEnvironmentAttribute();
+          
+          // Only react if environment actually changed
+          if (this.currentEnvironment !== previousEnvironment) {
+            this.handleEnvironmentChange(previousEnvironment, this.currentEnvironment);
+          }
+        }
+      });
+    });
+
+    this.observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    this.isInitialized = true;
+    console.log('🌍 Squarespace Environment Manager initialized');
+  }
+
+  // Handle environment changes
+  private async handleEnvironmentChange(from: string, to: string): Promise<void> {
+    console.log(`🔄 Environment changed: ${from} → ${to}`);
+    
+    if (to === 'EDITING') {
+      // Entering editing mode - destroy all plugins
+      this.destroyAllPlugins();
+    } else if (from === 'EDITING' && (to === 'PROD' || to === 'PREVIEW')) {
+      // Exiting editing mode - reinitialize all plugins
+      setTimeout(() => this.reinitializeAllPlugins(), 100); // Small delay for DOM stability
+    }
+  }
+
+  // Get current editing state
+  isEditing(): boolean {
+    return this.currentEnvironment === 'EDITING';
+  }
+
+  // Register a plugin with its initializer function
+  registerPlugin(pluginName: string, initializerFn: () => Promise<void>): void {
+    this.pluginInitializers.set(pluginName, initializerFn);
+    
+    // Initialize the global observer if this is the first plugin
+    this.initializeGlobalObserver();
+    
+    // If not in editing mode, initialize immediately
+    if (!this.isEditing()) {
+      initializerFn().catch(err => {
+        console.error(`Error initializing plugin ${pluginName}:`, err);
+      });
+    }
+  }
+
+  // Add plugin instance to tracking
+  addPluginInstance(pluginName: string, instance: any): void {
+    if (!this.allPluginInstances.has(pluginName)) {
+      this.allPluginInstances.set(pluginName, []);
+    }
+    this.allPluginInstances.get(pluginName)!.push(instance);
+    console.log(`📦 Plugin instance added: ${pluginName} (total: ${this.allPluginInstances.get(pluginName)!.length})`);
+  }
+
+  // Destroy all instances of all plugins
+  private destroyAllPlugins(): void {
+    let totalDestroyed = 0;
+    
+    this.allPluginInstances.forEach((instances, pluginName) => {
+      instances.forEach(instance => {
+        if (instance && typeof instance.destroy === 'function') {
+          try {
+            instance.destroy();
+            totalDestroyed++;
+          } catch (err) {
+            console.error(`Error destroying plugin instance for ${pluginName}:`, err);
+          }
+        }
+      });
+      instances.length = 0; // Clear the array
+    });
+    
+    if (totalDestroyed > 0) {
+      console.log(`🗑️  Destroyed ${totalDestroyed} plugin instances due to editing mode`);
+    }
+  }
+
+  // Reinitialize all registered plugins
+  private async reinitializeAllPlugins(): Promise<void> {
+    console.log(`🚀 Reinitializing ${this.pluginInitializers.size} plugins...`);
+    
+    const initPromises = Array.from(this.pluginInitializers.entries()).map(async ([pluginName, initFn]) => {
+      try {
+        await initFn();
+      } catch (err) {
+        console.error(`Error reinitializing plugin ${pluginName}:`, err);
+      }
+    });
+    
+    await Promise.all(initPromises);
+    console.log('✅ Plugin reinitialization complete');
+  }
+
+  // Get current environment
+  getCurrentEnvironment(): string {
+    return this.currentEnvironment;
+  }
+
+  // Get plugin instance count
+  getPluginInstanceCount(pluginName?: string): number {
+    if (pluginName) {
+      return this.allPluginInstances.get(pluginName)?.length || 0;
+    }
+    
+    let total = 0;
+    this.allPluginInstances.forEach(instances => {
+      total += instances.length;
+    });
+    return total;
+  }
+
+  // Cleanup (for testing purposes)
+  destroy(): void {
+    if (this.observer) {
+      this.observer.disconnect();
+      this.observer = null;
+    }
+    this.destroyAllPlugins();
+    this.pluginInitializers.clear();
+    this.isInitialized = false;
+    SquarespaceEnvironmentManager.instance = null;
+    console.log('🧹 Squarespace Environment Manager destroyed');
+  }
+}
+
 // Enhanced plugin initialization with editing state awareness
 export async function initializePluginWithEditingCheck(pluginName: string): Promise<void> {
   const script: HTMLOrSVGScriptElement = document.currentScript;
-  let pluginInstances: any[] = [];
+  const envManager = SquarespaceEnvironmentManager.getInstance();
 
-  // Check if body has editing class
-  const isEditing = (): boolean => {
-    const editingClass = SQSP_ENV_SELECTOR_MAP.get("EDITING");
-    return editingClass ? document.body.classList.contains(editingClass) : false;
-  };
-
-  // Initialize plugins when not in editing mode
-  const initializeIfNotEditing = async (): Promise<void> => {
-    if (isEditing()) {
+  // Create the plugin initializer function
+  const pluginInitializer = async (): Promise<void> => {
+    if (envManager.isEditing()) {
       console.log(`Plugin ${pluginName} not initialized - page is in editing mode`);
       return;
     }
@@ -280,12 +459,12 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
             containerNodes.forEach((container) => {
               const instance = new Class(container, options);
               instance.init();
-              pluginInstances.push(instance);
+              envManager.addPluginInstance(pluginName, instance);
             });
           } else {
             const instance = new Class(containerNodes as HTMLElement, options);
             instance.init();
-            pluginInstances.push(instance);
+            envManager.addPluginInstance(pluginName, instance);
           }
         } else {
           // Fallback to old HTML_SELECTOR_MAP behavior
@@ -295,12 +474,12 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
             containerNodes.forEach(container => {
               const instance = new Class(container, options);
               instance.init();
-              pluginInstances.push(instance);
+              envManager.addPluginInstance(pluginName, instance);
             });
           } else {
             const instance = new Class(document.body, options);
             instance.init();
-            pluginInstances.push(instance);
+            envManager.addPluginInstance(pluginName, instance);
           }
         }
       }
@@ -309,57 +488,20 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
     }
   };
 
-  // Destroy all plugin instances
-  const destroyPluginInstances = (): void => {
-    pluginInstances.forEach(instance => {
-      if (instance && typeof instance.destroy === 'function') {
-        try {
-          instance.destroy();
-        } catch (err) {
-          console.error(`Error destroying plugin instance for ${pluginName}:`, err);
-        }
-      }
-    });
-    pluginInstances = [];
-    console.log(`Plugin ${pluginName} instances destroyed due to editing mode`);
+  // Register the plugin with the environment manager
+  const registerPlugin = () => {
+    envManager.registerPlugin(pluginName, pluginInitializer);
   };
 
-  // Set up MutationObserver to watch for class changes on body
-  const setupEditingStateObserver = (): void => {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-          const currentlyEditing = isEditing();
-          
-          if (currentlyEditing && pluginInstances.length > 0) {
-            // Switched to editing mode - destroy plugins
-            destroyPluginInstances();
-          } else if (!currentlyEditing && pluginInstances.length === 0) {
-            // Switched out of editing mode - reinitialize plugins
-            setTimeout(initializeIfNotEditing, 100); // Small delay to ensure DOM is ready
-          }
-        }
-      });
-    });
-
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-  };
-
-  // Initialize on load
-  window.addEventListener("load", async () => {
-    setupEditingStateObserver();
-    await initializeIfNotEditing();
-  });
-
-  // Also initialize immediately if DOM is already loaded
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    setupEditingStateObserver();
-    setTimeout(initializeIfNotEditing, 0);
+  // Initialize based on document ready state
+  if (document.readyState === 'loading') {
+    window.addEventListener("load", registerPlugin);
+  } else {
+    // DOM is already loaded
+    setTimeout(registerPlugin, 0);
   }
 }
 
-// Export services for use in plugins
+// Export services and managers for use in plugins
 export { default as DeviceService } from "../services/DeviceService";
+export { SquarespaceEnvironmentManager };
