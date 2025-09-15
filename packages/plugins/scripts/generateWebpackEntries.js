@@ -56,15 +56,15 @@ function generateEntryContent(pluginName, pluginDir) {
   
   return `
 // Auto-generated entry point for ${pluginName}
-import { initializePlugin } from "${path.relative(
+import { initializePluginWithEditingCheck } from "${path.relative(
     path.join(__dirname, '../.temp/'), 
     path.join(__dirname, '../src/plugins/_lib/utils/index.ts')
   ).replace(/\\/g, '/')}";
 
 ${stylesImport}
 
-// Initialize the plugin
-initializePlugin("${pluginName}");
+// Initialize the plugin with editing state awareness
+initializePluginWithEditingCheck("${pluginName}");
 `.trim();
 }
 
