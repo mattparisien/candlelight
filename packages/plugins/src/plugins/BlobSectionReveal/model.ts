@@ -38,6 +38,9 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   private topSection!: HTMLElement;
   private bottomSection!: HTMLElement;
 
+  // Single source of truth for scroll duration (viewport heights)
+  private readonly SCROLL_DURATION_VH = 0.3; // 30% of viewport height
+
   private scrollSvc!: ScrollProgressService;
   private stickySvc!: StickyService;
   private clipPathSvc!: ClipPathService;
@@ -219,8 +222,11 @@ class BlobSectionReveal extends PluginBase<IBlobSectionRevealOptions> implements
   private computeRanges() {
     const rect = this.container.getBoundingClientRect();
     const start = window.scrollY + rect.top;
-    // Always use 1 viewport height (100vh) for scroll distance
-    const end = start + window.innerHeight / 2;
+    // Use the constant for scroll distance
+    const end = start + window.innerHeight * this.SCROLL_DURATION_VH;
+
+    // Set CSS variable to match scroll duration for container height
+    this.container.style.setProperty('--bsr-duration-vh', this.SCROLL_DURATION_VH.toString());
 
     this.scrollSvc.setRange(start, end);
 
