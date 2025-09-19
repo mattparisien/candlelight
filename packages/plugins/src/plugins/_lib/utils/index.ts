@@ -438,7 +438,7 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
 
       options = getPluginOptionsFromScript(script);
       plugin = await getPlugin(pluginName, internalUrl);
-
+ 
       if (!plugin) {
         throw new Error(
           `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`
