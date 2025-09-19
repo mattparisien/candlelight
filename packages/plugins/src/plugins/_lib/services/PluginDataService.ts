@@ -94,13 +94,14 @@ class PluginDataService {
     };
   }
 
-  async fetchPluginByName(pluginName: string): Promise<Plugin | undefined> {
+  async fetchPluginByName(pluginName: string, origin?: string): Promise<Plugin | undefined> {
     try {
       const slug = this.nameToSlug(pluginName);
       const response = await fetch(`${this.baseUrl}/api/plugins/${slug}`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          'Origin': origin || window.location.origin,
         },
       });
 

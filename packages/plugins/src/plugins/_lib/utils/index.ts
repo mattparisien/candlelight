@@ -26,8 +26,8 @@ const getPluginOptionsFromScript = (script: HTMLOrSVGScriptElement) => {
   return options;
 };
 
-async function getPlugin(pluginName: string): Promise<Plugin | undefined> {
-  return await PluginDataService.fetchPluginByName(pluginName);
+async function getPlugin(pluginName: string, origin: string): Promise<Plugin | undefined> {
+  return await PluginDataService.fetchPluginByName(pluginName, origin);
 }
 
 function getContainersBySelector(
@@ -93,7 +93,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
 
   window.addEventListener("load", async () => {
     try {
-      let options, module, Class, plugin: Plugin, containerNodes, isDev;
+      let options, module, Class, plugin: Plugin, containerNodes, isDev, internalUrl;
 
       if (!script) {
         throw new Error(
@@ -102,6 +102,8 @@ export async function initializePlugin(pluginName: string): Promise<void> {
       }
 
       isDev = document.querySelector(SQSP_ENV_SELECTOR_MAP.get("DEV"));
+      internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"];
+
 
       if (isDev) {
         console.log("Development environment detected, skipping plugin load.");
@@ -110,8 +112,17 @@ export async function initializePlugin(pluginName: string): Promise<void> {
         console.log(`Initializing plugin: ${pluginName}`);
       }
 
+      if (!internalUrl) {
+        throw new Error(
+          `Error initializing plugin ${pluginName}. Could not determine website domain.`
+        );
+      } else {
+        console.log(`Website domain: ${internalUrl}`);
+      }
+      
+
       options = getPluginOptionsFromScript(script);
-      plugin = await getPlugin(pluginName); // Get the plugin object from API
+      plugin = await getPlugin(pluginName, internalUrl); // Get the plugin object from API
 
       if (!plugin)
         throw new Error(
@@ -404,7 +415,7 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
     }
 
     try {
-      let options, module, Class, plugin: Plugin, containerNodes;
+      let options, module, Class, plugin: Plugin, containerNodes, internalUrl;
 
       if (!script) {
         throw new Error(
@@ -412,10 +423,21 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
         );
       }
 
+      internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"];
+
+      if (!internalUrl) {
+        throw new Error(
+          `Error initializing plugin ${pluginName}. Could not determine website domain.`
+        );
+      }
+      else {
+        console.log(`Website domain: ${internalUrl}`);
+      }
+
       console.log(`Initializing plugin: ${pluginName} (env: ${envManager.getCurrentEnvironment()})`);
 
       options = getPluginOptionsFromScript(script);
-      plugin = await getPlugin(pluginName);
+      plugin = await getPlugin(pluginName, internalUrl);
 
       if (!plugin) {
         throw new Error(
