@@ -431,7 +431,7 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
         );
       }
       else {
-        console.log(`Website domain: ${internalUrl}`);
+        console.log(`Website domain: ${internalUrl}`);  
       }
 
       console.log(`Initializing plugin: ${pluginName} (env: ${envManager.getCurrentEnvironment()})`);
