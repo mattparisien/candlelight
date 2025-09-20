@@ -74,7 +74,6 @@ app.get('/api/plugins/:slug', authenticateRequest, async (req, res) => {
     const domain = req.authorizedDomain;
     const { slug } = req.params;
     
-
     
     if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {
       return res.status(404).json({ error: 'Plugin not found or not authorized for this domain' });
@@ -84,6 +83,8 @@ app.get('/api/plugins/:slug', authenticateRequest, async (req, res) => {
     const domainWithPlugins = await AuthorizedDomain.findById(domain._id)
       .populate('pluginsAllowed', 'name slug displayName description bundlePath treeConfig isActive')
       .exec();
+
+      
     
     const plugin = domainWithPlugins.pluginsAllowed.find(p => p.slug === slug && p.isActive);
     

@@ -16,6 +16,7 @@
     "build:production": "node build-production.js",
     "start:server": "npm run start --workspace=packages/server",
     "create-plugin": "npm run create-plugin --workspace=packages/plugins",
+    "delete-plugin": "node packages/plugins/scripts/deletePlugin.js",
     "create-plugin-mixin": "npm run create-plugin-mixin --workspace=packages/plugins",
     "activate-plugin": "npm run plugins:activate --workspace=packages/server",
     "deploy:plugins": "node deploy-plugins.js",

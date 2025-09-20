@@ -58,15 +58,15 @@ async function authenticateRequest(req, res, next) {
     const referer = req.get('Referer');
     const origin = req.get('Origin');
     const userAgent = req.get('User-Agent');
+    const internalUrl = req.get('X-Internal-Url'); // Custom header for internal requests
     const requestPath = req.path;
-
-    console.log('the path', requestPath);
 
     console.log('Auth check:', {
       referer,
       origin,
       userAgent: userAgent?.substring(0, 100),
-      path: requestPath
+      path: requestPath,
+      internalUrl
     });
 
     // Allow localhost for development
@@ -90,7 +90,7 @@ async function authenticateRequest(req, res, next) {
     }
 
     // Extract domain from referer or origin
-    const domain = extractDomain(referer || origin);
+    const domain = extractDomain(internalUrl || referer || origin);
     console.log('Extracted domain:', domain);
     if (!domain) {
       console.log('No valid domain found in request');

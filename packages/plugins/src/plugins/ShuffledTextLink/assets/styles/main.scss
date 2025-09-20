@@ -1,0 +1,17 @@
+// Styles for shuffled-text-link plugin
+
+[data-candlelight-shuffled-text-link] {
+  // Add your plugin styles here
+  transition: all 0.3s ease;
+  
+  &:hover {
+    // Add hover styles
+  }
+}
+
+// Add responsive styles
+@media (max-width: 768px) {
+  [data-candlelight-plugin-shuffled-text-link] {
+    // Mobile styles
+  }
+}

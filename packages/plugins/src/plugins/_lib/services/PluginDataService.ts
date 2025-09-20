@@ -79,10 +79,8 @@ class PluginDataService {
             return import('../../ImageTrailer/model');
           case 'LayeredSections':
             return import('../../LayeredSections/model');
-          case 'BlobSectionReveal':
-            return import('../../BlobSectionReveal/model');
-          // case 'BlobRevealer':
-          //   return import('../../BlobRevealer/model');
+          case 'ShuffledTextLink':
+            return import('../../ShuffledTextLink/model');
           default:
             console.warn(`Plugin ${pluginName} module not found, skipping...`);
             return null;
@@ -94,14 +92,14 @@ class PluginDataService {
     };
   }
 
-  async fetchPluginByName(pluginName: string, origin?: string): Promise<Plugin | undefined> {
+  async fetchPluginByName(pluginName: string, internalUrl?: string): Promise<Plugin | undefined> {
     try {
       const slug = this.nameToSlug(pluginName);
       const response = await fetch(`${this.baseUrl}/api/plugins/${slug}`, {
         credentials: 'include',
         headers: {
+          'X-Internal-Url': internalUrl,
           'Content-Type': 'application/json',
-          'Origin': origin || window.location.origin,
         },
       });
 
