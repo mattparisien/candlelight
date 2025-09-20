@@ -162,35 +162,40 @@ function generatePluginPassword() {
 
 // Function to generate RTF install guide
 function generateInstallGuideRTF(displayName, slug, password) {
-  const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}\n\\f0\\fs24\\qc\\b ${displayName} by Candlelight Plugins\\b0\\par\n\\par\n\\b Plugin Install Guide:\\b0\\par\n{\\field{\\*\\fldinst HYPERLINK "https://candlelightplugins.com/${slug}"}{\\fldrslt https://candlelightplugins.com/${slug}}}\\par\n\\par\n\\b Password:\\b0\\par\n${password}\\par\n\\par\n\\b Happy designing and coding!\\b0\\par\n\\par\n\\b The Candlelight Plugins Team\\b0\\par\n}`;
+  const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}\n\\f0\\fs24\\qc\\b ${displayName} by Candlelight Plugins\\b0\\par\n\\par\n\\b Plugin Install Guide:\\b0\\par\n{\\field{\\*\\fldinst HYPERLINK "https://candlelightplugins.com/${slug}"}{\\fldrslt https://candlelightplugins.com/${slug}}}\\par\n\\par\n\\b Password:\\b0\\par\n${password}\\par\n\\par\n\\b Happy designing and coding!\\b0\\par\n\\par\n\\b The Candlelight Plugins Team\\b0\\par}`;
 
   return Buffer.from(rtfContent, 'utf8');
 }
 
-// Function to register plugin in MongoDB
-async function registerPluginInMongoDB(pluginData) {
+// Parse environment from command-line args
+function getEnvFromArgs() {
+  const envArg = process.argv.find(arg => arg.startsWith('--env='));
+  if (!envArg) return null;
+  const env = envArg.split('=')[1].trim().toUpperCase();
+  if (["DEV", "PROD", "ALL"].includes(env)) return env;
+  return null;
+}
+
+// Register plugin using a single server URL
+async function registerPlugin(pluginData) {
+  const url = "http://localhost:3001/admin/plugins";
+  console.log(`\n📡 Registering plugin at ${url} ...`);
   try {
     const fetch = await getFetch();
-    const response = await fetch('http://localhost:3001/admin/plugins', {
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(pluginData)
     });
-
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || `HTTP error! status: ${response.status}`);
     }
-
     const result = await response.json();
-    console.log('🎉 Plugin registered in MongoDB:', result.plugin.displayName);
-    return result.plugin;
+    console.log(`🎉 Plugin registered:`, result.plugin.displayName);
   } catch (error) {
-    console.error('❌ Failed to register plugin in MongoDB:', error.message);
+    console.error(`❌ Failed to register plugin:`, error.message);
     console.log('💡 Make sure the server is running on http://localhost:3001');
-    throw error;
   }
 }
 
@@ -202,6 +207,18 @@ async function createPlugin() {
   });
 
   try {
+    // ENV selection
+    let env = getEnvFromArgs();
+    if (!env) {
+      env = await new Promise((resolve) => {
+        rl.question('🌎 Select environment (1=DEV, 2=PROD, 3=ALL): ', answer => {
+          if (answer.trim() === '1' || /^dev$/i.test(answer)) resolve('DEV');
+          else if (answer.trim() === '2' || /^prod$/i.test(answer)) resolve('PROD');
+          else resolve('ALL');
+        });
+      });
+    }
+
     // Get plugin name from user
     const pluginName = await new Promise((resolve) => {
       rl.question('🔌 Enter the plugin name (e.g., "MyAwesome Plugin", "scroll-reveal"): ', resolve);
@@ -279,12 +296,26 @@ async function createPlugin() {
     const pluginsDir = path.join(__dirname, '../src/plugins');
     const pluginDir = path.join(pluginsDir, pascalCase);
 
+    let formats;
+    let skipLocal = false;
     if (fs.existsSync(pluginDir)) {
-      console.log(`❌ Plugin directory already exists: ${pluginDir}`);
-      process.exit(1);
+      const override = await new Promise((resolve) => {
+        rl.question(`❌ Plugin directory already exists: ${pluginDir}\nDo you want to recreate/override it? (y/N): `, answer => {
+          resolve(/^y(es)?$/i.test(answer.trim()));
+        });
+      });
+      if (!override) {
+        console.log('⚠️ Skipping local file creation. Plugin will still be registered in MongoDB.');
+        skipLocal = true;
+      } else {
+        // Remove the existing directory
+        fs.rmSync(pluginDir, { recursive: true, force: true });
+        console.log(`🗑️ Removed existing directory: ${pluginDir}`);
+      }
     }
-
-    const formats = createPluginFiles(pluginName, pluginDir);
+    if (!skipLocal) {
+      formats = createPluginFiles(pluginName, pluginDir);
+    }
 
     // Generate a secure UUID-based password for the plugin
     const pluginPassword = generatePluginPassword();
@@ -315,9 +346,8 @@ async function createPlugin() {
       isActive: true
     };
 
-    // Register in MongoDB
-    console.log('\n📡 Registering plugin in MongoDB...');
-    const createdPlugin = await registerPluginInMongoDB(pluginData);
+    // Register plugin using single server URL
+    await registerPlugin(pluginData);
 
     console.log(`\n✅ Plugin "${pascalCase}" created successfully!`);
     console.log(`🔐 Plugin Password: ${pluginPassword}`);

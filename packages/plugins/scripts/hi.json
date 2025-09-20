@@ -1,0 +1,31 @@
+{
+    "name": "ShuffledTextLink",
+    "slug": "shuffled-text-link",
+    "displayName": "ShuffledTextLink",
+    "description": "ShuffledTextLink plugin",
+    "version": "1.0.0",
+    "isActive": true,
+    "bundlePath": "/plugins/shuffled-text-link/bundle.js",
+    "password": "d420a007daef49e0913854969025",
+    "download": {
+        "$binary": {
+            "base64": "e1xydGYxXGFuc2lcZGVmZjAge1xmb250dGJsIHtcZjAgVGltZXMgTmV3IFJvbWFuO319ClxmMFxmczI0XHFjXGIgU2h1ZmZsZWRUZXh0TGluayBieSBDYW5kbGVsaWdodCBQbHVnaW5zXGIwXHBhcgpccGFyClxiIFBsdWdpbiBJbnN0YWxsIEd1aWRlOlxiMFxwYXIKe1xmaWVsZHtcKlxmbGRpbnN0IEhZUEVSTElOSyAiaHR0cHM6Ly9jYW5kbGVsaWdodHBsdWdpbnMuY29tL3NodWZmbGVkLXRleHQtbGluayJ9e1xmbGRyc2x0IGh0dHBzOi8vY2FuZGxlbGlnaHRwbHVnaW5zLmNvbS9zaHVmZmxlZC10ZXh0LWxpbmt9fVxwYXIKXHBhcgpcYiBQYXNzd29yZDpcYjBccGFyCmQ0MjBhMDA3ZGFlZjQ5ZTA5MTM4NTQ5NjkwMjVccGFyClxwYXIKXGIgSGFwcHkgZGVzaWduaW5nIGFuZCBjb2RpbmchXGIwXHBhcgpccGFyClxiIFRoZSBDYW5kbGVsaWdodCBQbHVnaW5zIFRlYW1cYjBccGFyCn0=",
+            "subType": "00"
+        }
+    },
+    "supportedPlatforms": [
+        "desktop"
+    ],
+    "squarespaceVersions": [
+        "7.1"
+    ],
+    "createdAt": {
+        "$date": {
+            "$numberLong": "1758370786239"
+        }
+    },
+    "__v": {
+        "$numberInt": "0"
+    },
+    "treeConfig": "a:not(:has(*)),button:not(:has(*))"
+}
