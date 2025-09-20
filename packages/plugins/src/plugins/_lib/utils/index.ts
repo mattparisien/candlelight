@@ -435,7 +435,7 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
       }
 
       console.log(`Initializing plugin: ${pluginName} (env: ${envManager.getCurrentEnvironment()})`);
- 
+  
       options = getPluginOptionsFromScript(script);
       plugin = await getPlugin(pluginName, internalUrl);
  
