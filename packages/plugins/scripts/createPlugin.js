@@ -80,7 +80,7 @@ class ${pascalCase} extends PluginBase<I${pascalCase}Options> implements I${pasc
 
   private setupPlugin(): void {
     // Add your plugin initialization logic here
-    this.container.setAttribute('data-candlelight-plugin-${kebabCase}', 'true');
+    this.container.setAttribute('data-candlelight-${kebabCase}', 'true');
     
     // Example: Add click handler
     this.container.addEventListener('click', this.handleClick.bind(this));

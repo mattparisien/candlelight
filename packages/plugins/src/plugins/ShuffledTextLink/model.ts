@@ -4,7 +4,7 @@ import SplitTextService from "../_lib/services/SplitTextService";
 
 interface IShuffledTextLinkOptions {
   duration?: number; // Duration of the shuffle animation in seconds
-  steps?: number;    // Number of shuffle steps
+  steps?: number;    // Number of shuffle 
 }
 
 interface IShuffledTextLink {
@@ -19,6 +19,7 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
   private originalText: string = "";
   private isAnimating: boolean = false;
   private shuffleTimeout: number | null = null;
+  private originalChars: string[] = [];
 
   private readonly duration: number = 0.3;
   private readonly steps: number = 4;
@@ -52,15 +53,14 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
     if (this.isAnimating || !this.splitSvc) return;
     this.isAnimating = true;
     const chars = Array.from(this.container.querySelectorAll('.st-char')) as HTMLElement[];
-    const originalChars = chars.map(c => c.textContent || "");
+    this.originalChars = chars.map(c => c.textContent || "");
     const duration = this.options.duration ?? this.duration;
-  
     const frameDelay = duration * 1000 / this.steps;
     let frame = 0;
 
     const shuffle = () => {
       if (!this.isAnimating) return; // Stop if mouseleave
-      const shuffled = [...originalChars];
+      const shuffled = [...this.originalChars];
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -73,7 +73,7 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
         this.shuffleTimeout = window.setTimeout(shuffle, frameDelay);
       } else {
         for (let i = 0; i < chars.length; i++) {
-          chars[i].textContent = originalChars[i];
+          chars[i].textContent = this.originalChars[i];
         }
         this.isAnimating = false;
         this.shuffleTimeout = null;
@@ -89,11 +89,10 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
       clearTimeout(this.shuffleTimeout);
       this.shuffleTimeout = null;
     }
-    // Restore original text
+    // Restore original text using originalChars
     const chars = Array.from(this.container.querySelectorAll('.st-char')) as HTMLElement[];
-    const originalChars = this.originalText.split("");
     for (let i = 0; i < chars.length; i++) {
-      chars[i].textContent = originalChars[i];
+      chars[i].textContent = this.originalChars[i];
     }
   };
 
