@@ -328,7 +328,6 @@ class SquarespaceEnvironmentManager {
       this.allPluginInstances.set(pluginName, []);
     }
     this.allPluginInstances.get(pluginName)!.push(instance);
-    console.log(`📦 Plugin instance added: ${pluginName} (total: ${this.allPluginInstances.get(pluginName)!.length})`);
   }
 
   // Destroy all instances of all plugins
