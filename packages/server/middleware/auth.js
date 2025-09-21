@@ -9,6 +9,7 @@ const os = require('os');
 async function getAuthorizedSystemStations() {
   try {
     const setting = await Setting.findOne({ section: 'all', key: 'authorizedSystemStations' });
+
     if (setting && setting.value) {
       return setting.value.split(',').map(s => s.trim().toLowerCase());
     }
@@ -39,6 +40,7 @@ async function isSystemStationAuthorized() {
   }
 
   const authorizedStations = await getAuthorizedSystemStations();
+  console.log('Authorized stations:', authorizedStations);
   return authorizedStations.includes(stationId.toLowerCase());
 }
 
