@@ -93,7 +93,7 @@ async function authenticatePluginRequest(req, res, next) {
 
     // Extract domain from referer or origin
     const domain = extractDomain(internalUrl || referer || origin);
-    console.log('Extracted domain:', domain);
+
     if (!domain) {
       console.log('No valid domain found in request');
       return res.status(403).json({
@@ -105,9 +105,7 @@ async function authenticatePluginRequest(req, res, next) {
     let pluginSlug = null;
     if (!requestPath.startsWith('/api/')) {
       pluginSlug = getPluginNameFromPath(requestPath);
-      console.log('the plugin slug', pluginSlug);
       if (!pluginSlug) {
-        console.log('Could not determine plugin slug from path:', requestPath);
         return res.status(403).json({
           error: 'Access denied: Invalid plugin request'
         });
@@ -117,7 +115,6 @@ async function authenticatePluginRequest(req, res, next) {
     // Check database for authorized domain
 
     const domains = await AuthorizedDomain.find({});
-    console.log('Authorized domains in DB:', domains.map(d => d.websiteUrl));
 
 
     const authorizedDomain = await AuthorizedDomain.findOne({
@@ -126,7 +123,6 @@ async function authenticatePluginRequest(req, res, next) {
     }).populate('pluginsAllowed');
 
     if (!authorizedDomain) {
-      console.log('Domain not found or not active:', domain);
       return res.status(403).json({
         error: 'Access denied: Unauthorized domain',
         domain: domain
@@ -134,11 +130,8 @@ async function authenticatePluginRequest(req, res, next) {
     }
 
     // Check if domain has access to this specific plugin (skip for API routes)
-    console.log('the plugin slug is', pluginSlug);
-    console.log('the authorized domain plugin slugs are', authorizedDomain.pluginsAllowed.map(p => p.slug));
     const allowedPluginSlugs = authorizedDomain.pluginsAllowed.map(p => p.slug);
     if (pluginSlug && !allowedPluginSlugs.includes(pluginSlug)) {
-      console.log('Domain does not have access to plugin:', domain, pluginSlug);
       return res.status(403).json({
         error: 'Access denied: Plugin not authorized for this domain',
         domain: domain,
