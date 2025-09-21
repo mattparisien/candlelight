@@ -22,7 +22,7 @@ async function getAuthorizedSystemStations() {
 async function getSystemStation() {
   try {
     const hostname = os.hostname();
-
+    
     return hostname;
   } catch (error) {
     console.error('Error fetching system stations:', error);
@@ -48,6 +48,7 @@ async function authenticatePluginRequest(req, res, next) {
   try {
 
 
+    console.log('hello!!!');
     const isSystemStation = await isSystemStationAuthorized();
 
     if (!isSystemStation) {
