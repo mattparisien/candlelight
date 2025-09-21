@@ -1,6 +1,7 @@
 import PluginBase from "../_PluginBase/model";
 import { PluginOptions } from "../_lib/ts/types";
 import SplitTextService from "../_lib/services/SplitTextService";
+import MouseEventsService, { EMouseEvent } from "../_lib/services/MouseEventsService";
 
 interface IShuffledTextLinkOptions {
   duration?: number; // Duration of the shuffle animation in seconds
@@ -20,6 +21,7 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
   private isAnimating: boolean = false;
   private shuffleTimeout: number | null = null;
   private originalChars: string[] = [];
+  private mouseEventsService?: MouseEventsService;
 
   private readonly duration: number = 0.3;
   private readonly steps: number = 4;
@@ -45,17 +47,31 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
     this.container.setAttribute('data-candlelight-shuffled-text-link', 'true');
     this.originalText = this.container.textContent || "";
     this.splitSvc = new SplitTextService(this.container, { mode: 'chars', charClass: 'st-char' });
-    this.container.addEventListener('mouseenter', this.handleHover);
-    this.container.addEventListener('mouseleave', this.handleMouseLeave);
+
+    // Use MouseEventsService for hover events
+    this.mouseEventsService = new MouseEventsService(this.container, [
+      { event: EMouseEvent.Enter, handler: this.handleHover },
+      { event: EMouseEvent.Leave, handler: this.handleMouseLeave }
+    ]);
+    this.mouseEventsService.init();
   }
 
   private handleHover = (event: Event): void => {
+    console.log('hovered!!!');
+    console.log('isAnimating:', this.isAnimating);
+    console.log('splitSvc:', this.splitSvc);
     if (this.isAnimating || !this.splitSvc) return;
     this.isAnimating = true;
     const chars = Array.from(this.container.querySelectorAll('.st-char')) as HTMLElement[];
     this.originalChars = chars.map(c => c.textContent || "");
     const duration = this.options.duration ?? this.duration;
     const frameDelay = duration * 1000 / this.steps;
+    console.log('chars', chars);
+    console.log('originalChars', this.originalChars);
+    console.log('duration', duration);
+    console.log('frameDelay', frameDelay);
+    console.log('steps', this.steps);
+    console.log(this.container, 'the container');
     let frame = 0;
 
     const shuffle = () => {
@@ -97,8 +113,10 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
   };
 
   destroy(): void {
-    this.container.removeEventListener('mouseenter', this.handleHover);
-    this.container.removeEventListener('mouseleave', this.handleMouseLeave);
+    if (this.mouseEventsService) {
+      this.mouseEventsService.destroy();
+      this.mouseEventsService = undefined;
+    }
     this.container.removeAttribute('data-candlelight-shuffled-text-link');
     if (this.splitSvc) {
       this.splitSvc.destroy();
