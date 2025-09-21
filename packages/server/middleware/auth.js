@@ -22,7 +22,6 @@ async function getAuthorizedSystemStations() {
 async function getSystemStation() {
   try {
     const hostname = os.hostname();
-    console.log('System hostname:', hostname);
     
     return hostname;
   } catch (error) {
@@ -50,7 +49,7 @@ async function authenticatePluginRequest(req, res, next) {
 
 
     const isSystemStation = await isSystemStationAuthorized();
-
+    console.log('isSystemStation:', isSystemStation);
     if (!isSystemStation) {
       return res.status(403).json({
         error: 'Access denied: Unauthorized system station'
