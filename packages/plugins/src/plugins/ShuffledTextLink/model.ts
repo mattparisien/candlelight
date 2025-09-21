@@ -62,32 +62,62 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
     console.log('splitSvc:', this.splitSvc);
     if (this.isAnimating || !this.splitSvc) return;
     this.isAnimating = true;
+
     const chars = Array.from(this.container.querySelectorAll('.st-char')) as HTMLElement[];
     this.originalChars = chars.map(c => c.textContent || "");
+
     const duration = this.options.duration ?? this.duration;
     const frameDelay = duration * 1000 / this.steps;
-    console.log('chars', chars);
-    console.log('originalChars', this.originalChars);
-    console.log('duration', duration);
-    console.log('frameDelay', frameDelay);
-    console.log('steps', this.steps);
-    console.log(this.container, 'the container');
     let frame = 0;
+
+    // Build groups of character indices grouped by .st-word
+    const wordEls = Array.from(this.container.querySelectorAll('.st-word')) as HTMLElement[];
+    const groups: number[][] = [];
+    if (wordEls.length > 0) {
+      wordEls.forEach(word => {
+        const wordChars = Array.from(word.querySelectorAll('.st-char')) as HTMLElement[];
+        const indices = wordChars
+          .map(c => chars.indexOf(c))
+          .filter(i => i >= 0);
+        if (indices.length) groups.push(indices);
+      });
+    }
+    // Fallback to single group containing all characters
+    if (groups.length === 0) {
+      groups.push(chars.map((_, i) => i));
+    }
 
     const shuffle = () => {
       if (!this.isAnimating) return; // Stop if mouseleave
+
+      // Start from originalChars each frame so shuffling per frame is consistent
       const shuffled = [...this.originalChars];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
+
+      // Shuffle values within each group only
+      groups.forEach(indices => {
+        // Extract values for this group
+        const values = indices.map(idx => shuffled[idx]);
+        // Fisher-Yates on the values array
+        for (let i = values.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [values[i], values[j]] = [values[j], values[i]];
+        }
+        // Write back shuffled values into the appropriate global indices
+        indices.forEach((globalIdx, k) => {
+          shuffled[globalIdx] = values[k];
+        });
+      });
+
+      // Apply to DOM
       for (let i = 0; i < chars.length; i++) {
         chars[i].textContent = shuffled[i];
       }
+
       frame++;
       if (frame < this.steps) {
         this.shuffleTimeout = window.setTimeout(shuffle, frameDelay);
       } else {
+        // restore original
         for (let i = 0; i < chars.length; i++) {
           chars[i].textContent = this.originalChars[i];
         }
