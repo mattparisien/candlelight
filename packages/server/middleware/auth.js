@@ -39,8 +39,6 @@ async function isSystemStationAuthorized() {
   }
 
   const authorizedStations = await getAuthorizedSystemStations();
-  console.log('Authorized stations:', authorizedStations);
-  console.log('Current station ID:', stationId);
   return authorizedStations.includes(stationId.toLowerCase());
 }
 
@@ -51,7 +49,7 @@ async function authenticatePluginRequest(req, res, next) {
 
 
     const isSystemStation = await isSystemStationAuthorized();
-    console.log('isSystemStation:', isSystemStation);
+
     if (!isSystemStation) {
       return res.status(403).json({
         error: 'Access denied: Unauthorized system station'
