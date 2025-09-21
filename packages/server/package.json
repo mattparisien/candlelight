@@ -39,6 +39,7 @@
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "mongoose": "^8.18.0",
+    "os": "^0.1.2",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

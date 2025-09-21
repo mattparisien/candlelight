@@ -1,60 +1,61 @@
 const mongoose = require('mongoose');
 const AuthorizedDomain = require('../models/AuthorizedDomain');
+const Setting = require('../models/Setting');
+const { extractDomain, getPluginNameFromPath } = require('./utils');
+const os = require('os');
 
-// Helper function to extract and normalize domain from URL
-function extractDomain(url) {
-  if (!url) return null;
 
+
+async function getAuthorizedSystemStations() {
   try {
-    const parsed = new URL(url);
-    let hostname = parsed.hostname.toLowerCase();
-
-    return hostname
-      .replace("www.", "")
-      .replace("http://", "")
-      .replace("https://", "")
-      .replace(/\/$/, "") // Remove trailing slash
-      .trim();
-
-  } catch (error) {
-    console.error('Error parsing URL:', url, error);
-    return null;
-  }
-}
-
-// Helper function to get plugin name from request path
-function getPluginNameFromPath(path) {
-  // Handle format: /plugins/{pluginName}/main.js
-  const pathParts = path.split('/');
-  let pluginFolder;
-
-  if (path.includes("/plugins/")) {
-    // Find the segment after /plugins/
-    const pluginIndex = pathParts.indexOf('plugins');
-    if (pluginIndex !== -1 && pathParts.length > pluginIndex + 1) {
-      pluginFolder = pathParts[pluginIndex + 1];
+    const setting = await Setting.findOne({ section: 'all', key: 'authorizedSystemStations' });
+    if (setting && setting.value) {
+      return setting.value.split(',').map(s => s.trim().toLowerCase());
     }
-  } else {
-    // Handle format: /{pluginName}/bundle.js
-    pluginFolder = pathParts[1]; // First segment after root
+  } catch (error) {
+    console.error('Error fetching authorized system stations:', error);
   }
-
-  console.log('Extracted plugin folder:', pluginFolder);
-
-  if (!pluginFolder) {
-    return null;
-  }
-
-  // Return the folder name as slug (kebab-case)
-  return pluginFolder.toLowerCase();
+  return [];
 }
 
 
+async function getSystemStation() {
+  try {
+    const hostname = os.hostname();
+
+    return hostname;
+  } catch (error) {
+    console.error('Error fetching system stations:', error);
+  }
+
+}
+
+async function isSystemStationAuthorized() {
+  const stationId = await getSystemStation();
+
+  if (!stationId) {
+    console.error('No hostname found for system station');
+    return false;
+  }
+
+  const authorizedStations = await getAuthorizedSystemStations();
+  return authorizedStations.includes(stationId.toLowerCase());
+}
 
 
 // Main authentication middleware
-async function authenticateRequest(req, res, next) {
+async function authenticatePluginRequest(req, res, next) {
   try {
+
+
+    const isSystemStation = await isSystemStationAuthorized();
+
+    if (!isSystemStation) {
+      return res.status(403).json({
+        error: 'Access denied: Unauthorized system station'
+      });
+    }
+
     const referer = req.get('Referer');
     const origin = req.get('Origin');
     const userAgent = req.get('User-Agent');
@@ -116,7 +117,7 @@ async function authenticateRequest(req, res, next) {
 
     const domains = await AuthorizedDomain.find({});
     console.log('Authorized domains in DB:', domains.map(d => d.websiteUrl));
-    
+
 
     const authorizedDomain = await AuthorizedDomain.findOne({
       websiteUrl: domain,
@@ -154,10 +155,10 @@ async function authenticateRequest(req, res, next) {
     }
 
     console.log('Access granted:', domain, pluginSlug);
-    
+
     // Set the authorized domain on the request for API endpoints
     req.authorizedDomain = authorizedDomain;
-    
+
     next();
 
   } catch (error) {
@@ -168,8 +169,32 @@ async function authenticateRequest(req, res, next) {
   }
 }
 
+async function authenticateAdminRequest(req, res, next) {
+  try {
+    const isSystemStation = await isSystemStationAuthorized();
+    if (!isSystemStation) {
+      return res.status(403).json({
+        error: 'Access denied: Unauthorized system station'
+      });
+    }
+    next();
+
+  }
+  catch (error) {
+    console.error('Admin authentication error:', error);
+    res.status(500).json({
+      error: 'Internal server error'
+    });
+
+    return;
+  }
+  next();
+
+}
+
 module.exports = {
-  authenticateRequest,
+  authenticatePluginRequest,
+  authenticateAdminRequest,
   AuthorizedDomain,
   extractDomain
 };

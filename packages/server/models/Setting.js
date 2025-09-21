@@ -2,15 +2,15 @@ const mongoose = require('mongoose');
 
 // MongoDB Schema for application settings
 const settingSchema = new mongoose.Schema({
-  settingSection: {
+  section: {
     type: String,
     required: true
   },
-  settingKey: {
+  key: {
     type: String,
     required: true
   },
-  settingValue: {
+  value: {
     type: String,
     required: true
   }
@@ -19,7 +19,7 @@ const settingSchema = new mongoose.Schema({
 });
 
 // Create a compound index to ensure unique combination of section + key
-settingSchema.index({ settingSection: 1, settingKey: 1 }, { unique: true });
+settingSchema.index({ section: 1, key: 1 }, { unique: true });
 
 const Setting = mongoose.model('Setting', settingSchema);
 

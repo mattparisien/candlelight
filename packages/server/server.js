@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
-const { authenticateRequest } = require('./middleware/auth');
+const { authenticatePluginRequest, authenticateAdminRequest } = require('./middleware/auth');
 const AuthorizedDomain = require('./models/AuthorizedDomain');
 const Plugin = require('./models/Plugin');
 
@@ -23,16 +23,16 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests) in development
     if (!origin && process.env.NODE_ENV === 'development') return callback(null, true);
-    
+
     // Allow Squarespace domains and custom domains
     if (origin && (
-      origin.includes('.squarespace.com') || 
+      origin.includes('.squarespace.com') ||
       origin.includes('localhost') ||
       origin.includes('127.0.0.1')
     )) {
       return callback(null, true);
     }
-    
+
     callback(null, true); // Allow all origins for now - auth middleware will handle specific domain checks
   },
   credentials: true
@@ -69,12 +69,12 @@ mongoose.connect(MONGODB_URI)
   });
 
 // API endpoint to get a single plugin by slug
-app.get('/api/plugins/:slug', authenticateRequest, async (req, res) => {
+app.get('/api/plugins/:slug', authenticatePluginRequest, async (req, res) => {
   try {
     const domain = req.authorizedDomain;
     const { slug } = req.params;
-    
-    
+
+
     if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {
       return res.status(404).json({ error: 'Plugin not found or not authorized for this domain' });
     }
@@ -84,14 +84,14 @@ app.get('/api/plugins/:slug', authenticateRequest, async (req, res) => {
       .populate('pluginsAllowed', 'name slug displayName description bundlePath treeConfig isActive')
       .exec();
 
-      
-    
+
+
     const plugin = domainWithPlugins.pluginsAllowed.find(p => p.slug === slug && p.isActive);
-    
+
     if (!plugin) {
       return res.status(404).json({ error: 'Plugin not found or not authorized for this domain' });
     }
-    
+
     res.json(plugin);
   } catch (error) {
     console.error('Error fetching plugin:', error);
@@ -100,10 +100,10 @@ app.get('/api/plugins/:slug', authenticateRequest, async (req, res) => {
 });
 
 // API endpoint to get plugins for a domain
-app.get('/api/plugins', authenticateRequest, async (req, res) => {
+app.get('/api/plugins', authenticatePluginRequest, async (req, res) => {
   try {
     const domain = req.authorizedDomain;
-    
+
     if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {
       return res.json([]);
     }
@@ -112,9 +112,9 @@ app.get('/api/plugins', authenticateRequest, async (req, res) => {
     const domainWithPlugins = await AuthorizedDomain.findById(domain._id)
       .populate('pluginsAllowed', 'name slug displayName description bundlePath treeConfig isActive')
       .exec();
-    
+
     const allowedPlugins = domainWithPlugins.pluginsAllowed.filter(plugin => plugin.isActive);
-    
+
     res.json(allowedPlugins);
   } catch (error) {
     console.error('Error fetching plugins:', error);
@@ -124,18 +124,18 @@ app.get('/api/plugins', authenticateRequest, async (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'healthy', 
+  res.json({
+    status: 'healthy',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
   });
 });
 
 // Admin endpoints for managing authorized domains
-app.post('/admin/domains', async (req, res) => {
+app.post('/admin/domains', authenticateAdminRequest, async (req, res) => {
   try {
     const { websiteUrl, pluginsAllowed, customerEmail, expiresAt, notes } = req.body;
-    
+
     const domain = new AuthorizedDomain({
       websiteUrl: websiteUrl.toLowerCase(),
       pluginsAllowed: pluginsAllowed || [],
@@ -143,7 +143,7 @@ app.post('/admin/domains', async (req, res) => {
       expiresAt: expiresAt ? new Date(expiresAt) : null,
       notes
     });
-    
+
     await domain.save();
     res.json({ success: true, domain });
   } catch (error) {
@@ -153,22 +153,22 @@ app.post('/admin/domains', async (req, res) => {
 });
 
 // Admin endpoint for creating plugins
-app.post('/admin/plugins', async (req, res) => {
+app.post('/admin/plugins', authenticateAdminRequest, async (req, res) => {
   try {
-    const { 
-      name, 
-      slug, 
-      displayName, 
-      description, 
-      bundlePath, 
-      treeConfig, 
+    const {
+      name,
+      slug,
+      displayName,
+      description,
+      bundlePath,
+      treeConfig,
       password,
       download,
-      supportedPlatforms, 
+      supportedPlatforms,
       squarespaceVersions,
-      isActive 
+      isActive
     } = req.body;
-    
+
     const pluginData = {
       name,
       slug,
@@ -190,9 +190,9 @@ app.post('/admin/plugins', async (req, res) => {
     if (download) {
       pluginData.download = Buffer.from(download, 'base64');
     }
-    
+
     const plugin = new Plugin(pluginData);
-    
+
     await plugin.save();
     res.json({ success: true, plugin });
   } catch (error) {
@@ -201,7 +201,7 @@ app.post('/admin/plugins', async (req, res) => {
   }
 });
 
-app.get('/admin/domains', async (req, res) => {
+app.get('/admin/domains', authenticateAdminRequest, async (req, res) => {
   try {
     const domains = await AuthorizedDomain.find().sort({ createdAt: -1 });
     res.json({ domains });
@@ -211,16 +211,16 @@ app.get('/admin/domains', async (req, res) => {
   }
 });
 
-app.put('/admin/domains/:id', async (req, res) => {
+app.put('/admin/domains/:id', authenticateAdminRequest, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-    
+
     const domain = await AuthorizedDomain.findByIdAndUpdate(id, updates, { new: true });
     if (!domain) {
       return res.status(404).json({ error: 'Domain not found' });
     }
-    
+
     res.json({ success: true, domain });
   } catch (error) {
     console.error('Error updating domain:', error);
@@ -228,15 +228,15 @@ app.put('/admin/domains/:id', async (req, res) => {
   }
 });
 
-app.delete('/admin/domains/:id', async (req, res) => {
+app.delete('/admin/domains/:id', authenticateAdminRequest, async (req, res) => {
   try {
     const { id } = req.params;
     const domain = await AuthorizedDomain.findByIdAndDelete(id);
-    
+
     if (!domain) {
       return res.status(404).json({ error: 'Domain not found' });
     }
-    
+
     res.json({ success: true, message: 'Domain deleted' });
   } catch (error) {
     console.error('Error deleting domain:', error);
@@ -263,13 +263,13 @@ pluginDirs.forEach(dir => {
 });
 
 // Serve protected plugin files with authentication
-app.use('/plugins', authenticateRequest, express.static(distPath, {
+app.use('/plugins', authenticatePluginRequest, express.static(distPath, {
   setHeaders: (res, path) => {
     // Set appropriate headers for JavaScript files
     if (path.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
     }
-    
+
     // Cache control
     res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
   }
@@ -278,7 +278,7 @@ app.use('/plugins', authenticateRequest, express.static(distPath, {
 // Error handling middleware
 app.use((error, req, res, next) => {
   console.error('Server error:', error);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
   });
@@ -286,9 +286,9 @@ app.use((error, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'Not found',
-    path: req.path 
+    path: req.path
   });
 });
 
