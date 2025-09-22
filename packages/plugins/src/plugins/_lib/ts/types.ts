@@ -21,7 +21,7 @@ export type HTMLSelector = string;
 export type PluginSelector = HTMLSelector;
 
 export type ElementTree = {
-  element: string;
+  element: string;  
   attributes?: {
     [key: string]:
       | string
