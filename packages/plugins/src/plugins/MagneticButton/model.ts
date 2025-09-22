@@ -5,7 +5,7 @@ import { PluginOptions } from "../_lib/ts/types";
 import PluginBase from "../_PluginBase/model";
 
 interface IMagneticButtonOptions {
-  strength: number;
+  strength: number; 
 }
 
 // Constants for strength validation
