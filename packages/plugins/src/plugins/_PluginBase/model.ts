@@ -21,7 +21,7 @@ abstract class PluginBase<T> {
 
     this.container = container;
     this.setAttributes(name);
-  }
+  }  
 
   isType(variable, typeName) {
     // Check for null explicitly since typeof null is "object"
