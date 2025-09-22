@@ -31,7 +31,10 @@ async function getSystemStation() {
 }
 
 async function isSystemStationAuthorized() {
+
+
   const stationId = await getSystemStation();
+  console.log('System station ID:', stationId);
 
   if (!stationId) {
     console.error('No hostname found for system station');
