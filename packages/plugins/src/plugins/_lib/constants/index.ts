@@ -6,5 +6,5 @@ export const PLUGIN_SELECTOR_MAPPING = new Map();
 PLUGIN_SELECTOR_MAPPING.set("MagneticButton", ".sqs-button-block");
 
 export const PLUGIN_MODULE_MAPPING = {
-  MagneticButton: () => import("../../MagneticButton/model"),
+  MagneticButton: () => import("../../MagneticButton/model"), 
 };
