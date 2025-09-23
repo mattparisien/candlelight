@@ -12,6 +12,7 @@ interface IMouseFollowerOptions {
   radius: number;
   speed: number;
   opacity: number;
+  hi: boolean;
 }
 
 interface IMouseFollower {
@@ -43,6 +44,8 @@ class MouseFollower
   private _isHoveringInteractive: boolean = false;
   private _hasPointer: boolean = false;
   private _leavingWindow: boolean = false; // track window-exit fade state
+    
+  private _hi: boolean = false; // unused for now
 
   posX = 0;
   posY = 0;
@@ -51,12 +54,14 @@ class MouseFollower
   options: PluginOptions<IMouseFollowerOptions> = {
     color: this._color,
     radius: this._radius,
+    hi: this._hi,
     speed: this._speed,
     opacity: this._opacity,
   }
 
   allowedOptions: (keyof IMouseFollowerOptions)[] = [
     "color",
+    "hi",
     "radius",
     "speed",
     "opacity",
