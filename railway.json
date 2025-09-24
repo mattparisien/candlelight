@@ -8,7 +8,7 @@
       "packages/plugins/**"
     ]
   },
-  "deploy": {
+  "deploy": { 
     "startCommand": "cd packages/server && npm start",
     "healthcheckPath": "/health",
     "restartPolicyType": "ON_FAILURE"
