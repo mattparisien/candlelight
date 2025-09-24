@@ -210,7 +210,7 @@ app.get('/admin/domains', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+ 
 app.put('/admin/domains/:id', async (req, res) => {
   try {
     const { id } = req.params;
