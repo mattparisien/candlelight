@@ -168,6 +168,7 @@ app.post('/admin/plugins', async (req, res) => {
       squarespaceVersions,
       isActive
     } = req.body;
+    console.log('hiiii!');
 
     const pluginData = {
       name,
