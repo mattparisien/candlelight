@@ -226,7 +226,7 @@ app.put('/admin/domains/:id', async (req, res) => {
     console.error('Error updating domain:', error);
     res.status(400).json({ error: error.message });
   }
-});
+}); 
 
 app.delete('/admin/domains/:id', async (req, res) => {
   try {
