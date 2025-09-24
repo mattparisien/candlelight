@@ -132,7 +132,7 @@ app.get('/health', (req, res) => {
 });
 
 // Admin endpoints for managing authorized domains
-app.post('/admin/domains', async (req, res) => {
+app.post('/admin/domains' , async (req, res) => {
   try {
     const { websiteUrl, pluginsAllowed, customerEmail, expiresAt, notes } = req.body;
 
