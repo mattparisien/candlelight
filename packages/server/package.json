@@ -23,7 +23,8 @@
     "db:sync": "node scripts/db-sync.js",
     "db:sync:dry-run": "DRY_RUN=true node scripts/db-sync.js",
     "db:trigger-sync": "node scripts/trigger-sync.js",
-    "db:trigger-sync:dry-run": "node scripts/trigger-sync.js --dry-run"
+    "db:trigger-sync:dry-run": "node scripts/trigger-sync.js --dry-run",
+    "postdeploy": "node scripts/post-deploy.js"
   },
   "keywords": [
     "authentication",
