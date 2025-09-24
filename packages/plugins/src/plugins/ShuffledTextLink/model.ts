@@ -48,6 +48,19 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
     this.originalText = this.container.textContent || "";
     this.splitSvc = new SplitTextService(this.container, { mode: 'chars', charClass: 'st-char' });
 
+    // If the container uses flex layout (flex or inline-flex) and no gap is defined, apply a small gap
+    try {
+      const cs = window.getComputedStyle(this.container);
+      if (cs && typeof cs.display === 'string' && cs.display.indexOf('flex') !== -1) {
+        // Only set gap if not already set inline
+        if (!this.container.style.gap) {
+          this.container.style.gap = '0.25em';
+        }
+      }
+    } catch (e) {
+      // Ignore any errors accessing computed style
+    }
+
     // Use MouseEventsService for hover events
     this.mouseEventsService = new MouseEventsService(this.container, [
       { event: EMouseEvent.Enter, handler: this.handleHover },
