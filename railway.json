@@ -9,7 +9,7 @@
     ]
   },
   "deploy": {
-    "startCommand": "cd packages/server && npm run postdeploy && npm start",
+    "startCommand": "cd packages/server && npm start",
     "healthcheckPath": "/health",
     "restartPolicyType": "ON_FAILURE"
   }
