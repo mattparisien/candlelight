@@ -5,59 +5,11 @@ const { extractDomain, getPluginNameFromPath } = require('./utils');
 const os = require('os');
 
 
-
-async function getAuthorizedSystemStations() {
-  try {
-    const setting = await Setting.findOne({ section: 'all', key: 'authorizedSystemStations' });
-    if (setting && setting.value) {
-      return setting.value.split(',').map(s => s.trim().toLowerCase());
-    }
-  } catch (error) {
-    console.error('Error fetching authorized system stations:', error);
-  }
-  return [];
-}
-
-
-async function getSystemStation() {
-  try {
-    const hostname = os.hostname();
-    
-    return hostname;
-  } catch (error) {
-    console.error('Error fetching system stations:', error);
-  }
-
-}
-
-async function isSystemStationAuthorized() {
-
-
-  const stationId = await getSystemStation();
-  console.log('System station ID:', stationId); 
-
-  if (!stationId) {
-    console.error('No hostname found for system station');
-    return false;
-  }
-
-  const authorizedStations = await getAuthorizedSystemStations();
-  return authorizedStations.includes(stationId.toLowerCase());
-}
-
-
 // Main authentication middleware
 async function authenticatePluginRequest(req, res, next) {
   try {
 
 
-    const isSystemStation = await isSystemStationAuthorized();
-
-    if (!isSystemStation) {
-      return res.status(403).json({
-        error: 'Access denied: Unauthorized system station'
-      });
-    }
 
     const referer = req.get('Referer');
     const origin = req.get('Origin');
@@ -165,32 +117,9 @@ async function authenticatePluginRequest(req, res, next) {
   }
 }
 
-async function authenticateAdminRequest(req, res, next) {
-  try {
-    const isSystemStation = await isSystemStationAuthorized();
-    if (!isSystemStation) {
-      return res.status(403).json({
-        error: 'Access denied: Unauthorized system station'
-      });
-    }
-    next();
-
-  }
-  catch (error) {
-    console.error('Admin authentication error:', error);
-    res.status(500).json({
-      error: 'Internal server error'
-    });
-
-    return;
-  }
-  next();
-
-}
 
 module.exports = {
   authenticatePluginRequest,
-  authenticateAdminRequest,
   AuthorizedDomain,
   extractDomain
 };

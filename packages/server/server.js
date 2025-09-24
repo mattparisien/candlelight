@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
-const { authenticatePluginRequest, authenticateAdminRequest } = require('./middleware/auth');
+const { authenticatePluginRequest } = require('./middleware/auth');
 const AuthorizedDomain = require('./models/AuthorizedDomain');
 const Plugin = require('./models/Plugin');
 
@@ -132,7 +132,7 @@ app.get('/health', (req, res) => {
 });
 
 // Admin endpoints for managing authorized domains
-app.post('/admin/domains', authenticateAdminRequest, async (req, res) => {
+app.post('/admin/domains', async (req, res) => {
   try {
     const { websiteUrl, pluginsAllowed, customerEmail, expiresAt, notes } = req.body;
 
@@ -153,7 +153,7 @@ app.post('/admin/domains', authenticateAdminRequest, async (req, res) => {
 });
 
 // Admin endpoint for creating plugins
-app.post('/admin/plugins', authenticateAdminRequest, async (req, res) => {
+app.post('/admin/plugins', async (req, res) => {
   try {
     const {
       name,
@@ -201,7 +201,7 @@ app.post('/admin/plugins', authenticateAdminRequest, async (req, res) => {
   }
 });
 
-app.get('/admin/domains', authenticateAdminRequest, async (req, res) => {
+app.get('/admin/domains', async (req, res) => {
   try {
     const domains = await AuthorizedDomain.find().sort({ createdAt: -1 });
     res.json({ domains });
@@ -211,7 +211,7 @@ app.get('/admin/domains', authenticateAdminRequest, async (req, res) => {
   }
 });
 
-app.put('/admin/domains/:id', authenticateAdminRequest, async (req, res) => {
+app.put('/admin/domains/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -228,7 +228,7 @@ app.put('/admin/domains/:id', authenticateAdminRequest, async (req, res) => {
   }
 });
 
-app.delete('/admin/domains/:id', authenticateAdminRequest, async (req, res) => {
+app.delete('/admin/domains/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const domain = await AuthorizedDomain.findByIdAndDelete(id);
