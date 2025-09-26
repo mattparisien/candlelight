@@ -100,7 +100,7 @@ init(): void {
         w.className = this.options.wordClass;
         w.textContent = t.value;
         // inline-block helps more stable line calculations
-        w.style.display = 'inline-block';
+        w.style.display = 'inline';
         this.el.appendChild(w);
         wordSpans.push(w);
       } else {
@@ -148,7 +148,7 @@ init(): void {
         c.className = this.options.charClass;
         c.textContent = ch;
         // keep inline-block for more predictable layout/animation hooks
-        c.style.display = 'inline-block';
+        c.style.display = 'inline';
         w.appendChild(c);
       }
     }
