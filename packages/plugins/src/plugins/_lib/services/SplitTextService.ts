@@ -149,7 +149,7 @@ init(): void {
         c.textContent = ch;
         // keep inline-block for more predictable layout/animation hooks
         c.style.display = 'inline';
-        w.appendChild(c);
+        w.appendChild(c); 
       }
     }
   }
