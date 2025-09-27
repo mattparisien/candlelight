@@ -76,10 +76,7 @@ app.get('/api/plugins/:slug', authenticatePluginRequest, async (req, res) => {
 
 
 
-    if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {
-      console.log('should not make it here');
-      console.log('plugins allowed', domain ? domain.pluginsAllowed : 'no domain');
-      
+    if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {      
       return res.status(404).json({ error: 'Plugin not found or not authorized for this domain' });
     }
 
