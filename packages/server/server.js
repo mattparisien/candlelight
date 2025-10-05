@@ -7,6 +7,7 @@ const path = require('path');
 const { authenticatePluginRequest } = require('./middleware/auth');
 const AuthorizedDomain = require('./models/AuthorizedDomain');
 const Plugin = require('./models/Plugin');
+const Order = require('./models/Order');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -242,6 +243,64 @@ app.delete('/admin/domains/:id', async (req, res) => {
     res.json({ success: true, message: 'Domain deleted' });
   } catch (error) {
     console.error('Error deleting domain:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Orders API for storing plugin purchases
+app.post('/api/orders', async (req, res) => {
+  try {
+    const { orderId, pluginId, clientEmail, clientName, amount, currency, metadata } = req.body;
+
+    if (!orderId || !pluginId || !clientEmail) {
+      return res.status(400).json({ error: 'orderId, pluginId and clientEmail are required' });
+    }
+
+    // Ensure plugin exists
+    const plugin = await Plugin.findById(pluginId);
+    if (!plugin) {
+      return res.status(404).json({ error: 'Plugin not found' });
+    }
+
+    const order = new Order({
+      orderId,
+      plugin: plugin._id,
+      clientEmail: clientEmail.toLowerCase(),
+      clientName,
+      amount,
+      currency: currency || 'USD',
+      metadata: metadata || {}
+    });
+
+    await order.save();
+    res.json({ success: true, order });
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get('/api/orders', async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate('plugin', 'name slug displayName')
+      .sort({ createdAt: -1 });
+
+    res.json({ orders });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id).populate('plugin', 'name slug displayName');
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    res.json({ order });
+  } catch (error) {
+    console.error('Error fetching order:', error);
     res.status(500).json({ error: error.message });
   }
 });
