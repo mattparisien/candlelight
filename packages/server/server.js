@@ -22,22 +22,12 @@ app.use(helmet({
 
 // CORS configuration for plugin requests
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests) in development
-    // if (!origin && process.env.NODE_ENV === 'development') return callback(null, true);
-
-    // // Allow Squarespace domains and custom domains
-    // if (origin && (
-    //   origin.includes(process.env.SQSP_INTERNAL_DOMAIN) ||
-    //   origin.includes(process.env.SQSP_DOMAIN)
-    // )) {
-    //   return callback(null, true);
-    // }
-
-    callback(null, true); // Allow all origins for now - auth middleware will handle specific domain checks
-  },
-  credentials: true
+  origin: '*',
+  credentials: false
 }));
+
+// Ensure preflight requests return CORS headers
+app.options('*', cors());
 
 // Body parsing middleware
 app.use(express.json());
