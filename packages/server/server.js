@@ -23,14 +23,16 @@ app.use(helmet({
 // CORS configuration for plugin requests
 app.use(cors({
   origin: function (origin, callback) {
+    console.log('CORS check for origin:', origin)
+    console.log('SQSP_INTERNAL_DOMAIN:', process.env.SQSP_INTERNAL_DOMAIN);
+    console.log('SQSP_DOMAIN:', process.env.SQSP_DOMAIN);
     // Allow requests with no origin (like mobile apps or curl requests) in development
     if (!origin && process.env.NODE_ENV === 'development') return callback(null, true);
 
     // Allow Squarespace domains and custom domains
     if (origin && (
-      origin.includes('.squarespace.com') ||
-      origin.includes('localhost') ||
-      origin.includes('127.0.0.1')
+      origin.includes(process.env.SQSP_INTERNAL_DOMAIN) ||
+      origin.includes(process.env.SQSP_DOMAIN)
     )) {
       return callback(null, true);
     }
