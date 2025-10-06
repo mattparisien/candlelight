@@ -19,15 +19,6 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: false // Disable for plugin serving
 }));
-
-// CORS configuration for plugin requests
-app.use(cors({
-  origin: '*',
-  credentials: false
-}));
-
-// Ensure preflight requests return CORS headers
-app.options('/:path(*)', cors());
  
 // Body parsing middleware
 app.use(express.json());
