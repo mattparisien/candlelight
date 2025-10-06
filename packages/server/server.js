@@ -27,7 +27,7 @@ app.use(cors({
 }));
 
 // Ensure preflight requests return CORS headers
-app.options('/*', cors());
+app.options('/:path(*)', cors());
  
 // Body parsing middleware
 app.use(express.json());
