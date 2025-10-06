@@ -8,6 +8,7 @@ const { authenticatePluginRequest } = require('./middleware/auth');
 const AuthorizedDomain = require('./models/AuthorizedDomain');
 const Plugin = require('./models/Plugin');
 const Order = require('./models/Order');
+const { getRecentOrders } = require('./lib/getRecentOrders');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -77,7 +78,7 @@ app.get('/api/plugins/:slug', authenticatePluginRequest, async (req, res) => {
 
 
 
-    if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {      
+    if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {
       return res.status(404).json({ error: 'Plugin not found or not authorized for this domain' });
     }
 
@@ -134,7 +135,7 @@ app.get('/health', (req, res) => {
 });
 
 // Admin endpoints for managing authorized domains
-app.post('/admin/domains' , async (req, res) => {
+app.post('/admin/domains', async (req, res) => {
   try {
     const { websiteUrl, pluginsAllowed, customerEmail, expiresAt, notes } = req.body;
 
@@ -213,7 +214,7 @@ app.get('/admin/domains', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
- 
+
 app.put('/admin/domains/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -229,7 +230,7 @@ app.put('/admin/domains/:id', async (req, res) => {
     console.error('Error updating domain:', error);
     res.status(400).json({ error: error.message });
   }
-}); 
+});
 
 app.delete('/admin/domains/:id', async (req, res) => {
   try {
@@ -304,6 +305,14 @@ app.get('/api/orders/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+app.post("/api/orders/refresh", async (req, res) => {
+
+  const orders = await getRecentOrders();
+  console.log(orders);
+
+  return res.status(200);
+})
 
 // Create dist directory structure if it doesn't exist
 const distPath = path.join(__dirname, 'dist', 'public');
