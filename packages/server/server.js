@@ -24,9 +24,6 @@ app.use(helmet({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Enable CORS - allow all origins
-app.use(cors());
-app.options('*', cors());
 
 // Serve deployment manifest
 app.get('/plugins/manifest', (req, res) => {
