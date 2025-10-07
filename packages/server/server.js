@@ -20,14 +20,22 @@ app.use(helmet({
   contentSecurityPolicy: false // Disable for plugin serving
 }));
 
+// CORS configuration for plugin requests
 app.use(cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = ['https://roadrunner-piano-gdlc.squarespace.com'];
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests) in development
+    if (!origin && process.env.NODE_ENV === 'development') return callback(null, true);
+
+    // Allow Squarespace domains and custom domains
+    if (origin && (
+      origin.includes('.squarespace.com') ||
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1')
+    )) {
+      return callback(null, true);
     }
+
+    callback(null, true); // Allow all origins for now - auth middleware will handle specific domain checks
   },
   credentials: true
 }));
