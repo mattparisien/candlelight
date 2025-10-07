@@ -20,11 +20,16 @@ app.use(helmet({
   contentSecurityPolicy: false // Disable for plugin serving
 }));
 
-// Allow CORS from all domains
 app.use(cors({
-  origin: '*', // Allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+  origin: (origin, callback) => {
+    const allowedOrigins = ['https://roadrunner-piano-gdlc.squarespace.com'];
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
  
 // Body parsing middleware
