@@ -25,7 +25,10 @@ const authorizedDomainSchema = new mongoose.Schema({
     type: Date,
     default: null // null means no expiration
   },
-  customerEmail: String,
+  client: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Client'
+  },
   notes: String
 }, {
   timestamps: true

@@ -12,13 +12,10 @@ const orderSchema = new mongoose.Schema({
     ref: 'Plugin',
     required: true
   },
-  clientEmail: {
-    type: String,
-    required: true,
-    lowercase: true
-  },
-  clientName: {
-    type: String
+  clientId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Client',
+    required: true
   },
   amount: {
     type: Number

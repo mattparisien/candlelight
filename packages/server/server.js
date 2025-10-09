@@ -8,6 +8,7 @@ const { authenticatePluginRequest } = require('./middleware/auth');
 const AuthorizedDomain = require('./models/AuthorizedDomain');
 const Plugin = require('./models/Plugin');
 const Order = require('./models/Order');
+const Client = require('./models/Client');
 const { getRecentOrders } = require('./lib/getRecentOrders');
 
 const app = express();
@@ -137,12 +138,25 @@ app.get('/health', (req, res) => {
 // Admin endpoints for managing authorized domains
 app.post('/admin/domains', async (req, res) => {
   try {
-    const { websiteUrl, pluginsAllowed, customerEmail, expiresAt, notes } = req.body;
+    const { websiteUrl, pluginsAllowed, customerEmail, clientEmail, clientId, expiresAt, notes } = req.body;
+
+    let client = null;
+    // Prefer explicit clientId if provided
+    if (clientId) {
+      client = await Client.findById(clientId);
+    } else if (clientEmail || customerEmail) {
+      const email = (clientEmail || customerEmail).toLowerCase();
+      client = await Client.findOne({ email });
+      if (!client) {
+        client = new Client({ email, name: null, metadata: {} });
+        await client.save();
+      }
+    }
 
     const domain = new AuthorizedDomain({
       websiteUrl: websiteUrl.toLowerCase(),
       pluginsAllowed: pluginsAllowed || [],
-      customerEmail,
+      client: client ? client._id : undefined,
       expiresAt: expiresAt ? new Date(expiresAt) : null,
       notes
     });
@@ -220,6 +234,19 @@ app.put('/admin/domains/:id', async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    // Handle client updates: accept clientEmail or clientId
+    if (updates.clientEmail || updates.customerEmail) {
+      const email = (updates.clientEmail || updates.customerEmail).toLowerCase();
+      let client = await Client.findOne({ email });
+      if (!client) {
+        client = new Client({ email, name: null, metadata: {} });
+        await client.save();
+      }
+      updates.client = client._id;
+      delete updates.clientEmail;
+      delete updates.customerEmail;
+    }
+
     const domain = await AuthorizedDomain.findByIdAndUpdate(id, updates, { new: true });
     if (!domain) {
       return res.status(404).json({ error: 'Domain not found' });
@@ -249,9 +276,14 @@ app.delete('/admin/domains/:id', async (req, res) => {
 });
 
 // Orders API for storing plugin purchases
-app.post('/api/orders', async (req, res) => {
+app.post('/api/orders/:id', async (req, res) => {
   try {
-    const { orderId, pluginId, clientEmail, clientName, amount, currency, metadata } = req.body;
+    const orderId = req.params.id;
+
+    const orders = await getRecentOrders();
+
+    console.log('the orders', orders);
+    return res.status(309);
 
     if (!orderId || !pluginId || !clientEmail) {
       return res.status(400).json({ error: 'orderId, pluginId and clientEmail are required' });
@@ -263,11 +295,17 @@ app.post('/api/orders', async (req, res) => {
       return res.status(404).json({ error: 'Plugin not found' });
     }
 
+    // Find or create client record
+    let client = await Client.findOne({ email: clientEmail.toLowerCase() });
+    if (!client) {
+      client = new Client({ email: clientEmail.toLowerCase(), name: clientName || undefined, metadata: {} });
+      await client.save();
+    }
+
     const order = new Order({
       orderId,
       plugin: plugin._id,
-      clientEmail: clientEmail.toLowerCase(),
-      clientName,
+      clientId: client._id,
       amount,
       currency: currency || 'USD',
       metadata: metadata || {}
@@ -294,17 +332,17 @@ app.get('/api/orders', async (req, res) => {
   }
 });
 
-app.get('/api/orders/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const order = await Order.findById(id).populate('plugin', 'name slug displayName');
-    if (!order) return res.status(404).json({ error: 'Order not found' });
-    res.json({ order });
-  } catch (error) {
-    console.error('Error fetching order:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+// app.get('/api/orders/:id', async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const order = await Order.findById(id).populate('plugin', 'name slug displayName');
+//     if (!order) return res.status(404).json({ error: 'Order not found' });
+//     res.json({ order });
+//   } catch (error) {
+//     console.error('Error fetching order:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 app.post("/api/orders/refresh", async (req, res) => {
 
