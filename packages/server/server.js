@@ -31,7 +31,8 @@ app.use(cors({
     if (origin && (
       origin.includes('.squarespace.com') ||
       origin.includes('localhost') ||
-      origin.includes('127.0.0.1')
+      origin.includes('127.0.0.1') || 
+      origin.includes(".candlelightplugins.com")
     )) {
       return callback(null, true);
     }
