@@ -48,6 +48,8 @@ async function authenticatePluginRequest(req, res, next) {
     // Extract domain from referer or origin
     const domain = extractDomain(internalUrl || referer || origin);
 
+    console.log('the origin domain is:', domain);
+
     if (!domain) {
       console.log('No valid domain found in request');
       return res.status(403).json({
@@ -76,6 +78,13 @@ async function authenticatePluginRequest(req, res, next) {
       status: 'active'
     }).populate('pluginsAllowed');
 
+    console.log('Authorized domain check:', {
+      domain,
+      found: !!authorizedDomain,
+      pluginSlug,
+      allowedPlugins: authorizedDomain ? authorizedDomain.pluginsAllowed.map(p => p.slug) : []
+    });
+
     if (!authorizedDomain) {
       return res.status(403).json({
         error: 'Access denied: Unauthorized domain',
@@ -86,6 +95,7 @@ async function authenticatePluginRequest(req, res, next) {
     // Check if domain has access to this specific plugin (skip for API routes)
     const allowedPluginSlugs = authorizedDomain.pluginsAllowed.map(p => p.slug);
     if (pluginSlug && !allowedPluginSlugs.includes(pluginSlug)) {
+      console.log('Plugin not authorized for domain:', domain, pluginSlug);
       return res.status(403).json({
         error: 'Access denied: Plugin not authorized for this domain',
         domain: domain,
