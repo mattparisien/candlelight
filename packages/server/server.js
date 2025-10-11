@@ -337,7 +337,7 @@ app.post('/api/orders/:id', async (req, res) => {
       plugin: plugin ? plugin._id : undefined,
       clientId: client._id,
       amount: amount || undefined,
-      currency,
+      currency, 
       metadata: found
     });
 
