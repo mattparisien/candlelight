@@ -348,11 +348,15 @@ app.post('/api/orders/:id', async (req, res) => {
 
 app.get('/api/orders', async (req, res) => {
   try {
-    const orders = await Order.find()
-      .populate('plugin', 'name slug displayName')
-      .sort({ createdAt: -1 });
 
-    res.json({ orders });
+    const orders = getRecentOrders();
+    return res.json({ orders });
+
+    // const orders = await Order.find()
+    //   .populate('plugin', 'name slug displayName')
+    //   .sort({ createdAt: -1 });
+
+    // res.json({ orders });
   } catch (error) {
     console.error('Error fetching orders:', error);
     res.status(500).json({ error: error.message });
