@@ -9,7 +9,7 @@ const AuthorizedDomain = require('./models/AuthorizedDomain');
 const Plugin = require('./models/Plugin');
 const Order = require('./models/Order');
 const Client = require('./models/Client');
-const { getRecentOrders } = require('./lib/getRecentOrders');
+const getRecentOrders = require('./lib/getRecentOrders');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
