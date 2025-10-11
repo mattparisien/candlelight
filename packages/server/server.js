@@ -352,8 +352,8 @@ app.post('/api/orders/:id', async (req, res) => {
 app.get('/api/orders', async (req, res) => {
   try {
 
-    const orders = getRecentOrders();
-    console.log(orders);
+    const orders = await getRecentOrders();
+    
     return res.json({ orders: orders });
 
     // const orders = await Order.find()
