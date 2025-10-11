@@ -33,7 +33,7 @@ app.use(cors({
     if (origin && (
       origin.includes('.squarespace.com') ||
       origin.includes('localhost') ||
-      origin.includes('127.0.0.1') || 
+      origin.includes('127.0.0.1') ||
       origin.includes(".candlelightplugins.com")
     )) {
       return callback(null, true);
@@ -44,7 +44,7 @@ app.use(cors({
   },
   credentials: true
 }));
- 
+
 // Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -291,14 +291,28 @@ app.post('/api/orders/:id', async (req, res) => {
     // Fetch recent orders from Squarespace and find the matching one
     const orders = await getRecentOrders();
 
-    return res.json({ orders });
 
     const found = orders.find(o => o.id === orderId);
     if (!found) return res.status(404).json({ error: 'Order not found in Squarespace recent orders' });
 
+
     // Extract relevant fields
     const clientEmail = found.customerEmail;
-    console.log(found.lineItems);
+    const plugins = await Promise.all(found.lineItems.map(async lineItem => {
+      const pluginName = lineItem.productName;
+      const plugin = await Plugin.findOne({ name: pluginName });
+      return plugin;
+    }));
+    if (plugins.length === 0)
+      return res.status(404).json({ error: 'No matching plugins found' });
+
+    // Filter out any null plugins
+    const validPlugins = plugins.filter(plugin => plugin !== null);
+    if (validPlugins.length === 0) {
+      return res.status(404).json({ error: 'No valid plugins found' });
+    }
+    return res.status(200).json({ plugins: validPlugins });
+
     return;
     const pluginId = req.body.pluginId || found.metadata?.pluginId || found.pluginId;
     const amount = found.total || found.amount || req.body.amount;
@@ -337,7 +351,7 @@ app.post('/api/orders/:id', async (req, res) => {
       plugin: plugin ? plugin._id : undefined,
       clientId: client._id,
       amount: amount || undefined,
-      currency, 
+      currency,
       metadata: found
     });
 
