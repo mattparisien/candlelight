@@ -4,7 +4,7 @@ async function getRecentOrders() {
 
   // Format timestamps as ISO 8601 (UTC)
   const isoNow = now.toISOString();
-  const isoPast = tenMinutesAgo.toISOString();
+  // const isoPast = tenMinutesAgo.toISOString();
 
   // Build Squarespace API URL
   const url = `https://api.squarespace.com/1.0/commerce/orders`;
