@@ -293,8 +293,6 @@ app.post('/api/orders/:id', async (req, res) => {
     const found = orders.result.find(o => o.id === orderId);
     if (!found) return res.status(404).json({ error: 'Order not found in Squarespace recent orders' });
 
-    console.log(found);
-
     // Extract relevant fields
     const clientEmail = found.customerEmail;
     const plugins = await Promise.all(found.lineItems.map(async lineItem => {
@@ -310,26 +308,15 @@ app.post('/api/orders/:id', async (req, res) => {
     if (validPlugins.length === 0) {
       return res.status(404).json({ error: 'No valid plugins found' });
     }
-    return res.status(200).json({ plugins: validPlugins });
+    
 
-    return;
-    const pluginId = req.body.pluginId || found.metadata?.pluginId || found.pluginId;
-    const amount = found.total || found.amount || req.body.amount;
-    const currency = found.currency || req.body.currency || 'USD';
-    const billing = found.billingAddress || {};
-
-    if (!clientEmail) return res.status(400).json({ error: 'Client email not found on Squarespace order' });
-
-    // Ensure plugin exists if pluginId provided
-    let plugin = null;
-    if (pluginId) plugin = await Plugin.findById(pluginId);
-    if (pluginId && !plugin) return res.status(404).json({ error: 'Plugin not found' });
-
-    // Find or create client from billingAddress
-    let client = await Client.findOne({ email: clientEmail.toLowerCase() });
-    if (!client) {
-      client = new Client({
-        email: clientEmail.toLowerCase(),
+  // Find or create client from billingAddress
+  let websiteUrl = found.customizations.find(x => x.label.toLowerCase() === "internal squarespace url")?.value || null;
+  console.log(websiteUrl, 'the website url')
+  let client = await Client.findOne({ email: clientEmail.toLowerCase() });
+  if (!client) {
+    client = new Client({
+      email: clientEmail.toLowerCase(),
         name: `${billing.firstname || ''} ${billing.lastname || ''}`.trim() || undefined,
         firstname: billing.firstname || undefined,
         lastname: billing.lastname || undefined,
@@ -347,7 +334,7 @@ app.post('/api/orders/:id', async (req, res) => {
 
     const orderDoc = new Order({
       orderId,
-      plugin: plugin ? plugin._id : undefined,
+      plugins: plugin ? plugin._id : undefined,
       clientId: client._id,
       amount: amount || undefined,
       currency,

@@ -7,11 +7,10 @@ const orderSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  plugin: {
+  plugins: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Plugin',
-    required: true
-  },
+    ref: 'Plugin'
+  }],
   clientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Client',
