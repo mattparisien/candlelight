@@ -290,33 +290,45 @@ app.post('/api/orders/:id', async (req, res) => {
 
     // Fetch recent orders from Squarespace and find the matching one
     const orders = await getRecentOrders();
-    const found = orders.result.find(o => o.id === orderId);
+    const found = (orders.result || orders).find(o => o.id === orderId || o.orderId === orderId);
     if (!found) return res.status(404).json({ error: 'Order not found in Squarespace recent orders' });
 
     // Extract relevant fields
-    const clientEmail = found.customerEmail;
+    const clientEmail = found.customerEmail || (found.customer && found.customer.email) || (found.billingAddress && found.billingAddress.email);
+    const billing = found.billingAddress || {};
+    const amount = found.total || found.amount || req.body.amount;
+    const currency = found.currency || req.body.currency || 'USD';
+    const lineItems = Array.isArray(found.lineItems) ? found.lineItems : [];
+
+    if (!clientEmail) return res.status(400).json({ error: 'Client email not found on Squarespace order' });
+
+    // Helper to escape regex
+    const escapeRegex = (s) => (s || '').replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+
+    // Resolve plugins from lineItems to ObjectId values
     const plugins = await Promise.all(found.lineItems.map(async lineItem => {
-      const pluginName = lineItem.productName;
-      const plugin = await Plugin.findOne({ displayName: pluginName });
-      return plugin;
+      try {
+        const pluginName = lineItem.productName || lineItem.name || lineItem.productTitle;
+        if (!pluginName) return null;
+        const regex = new RegExp(`^${escapeRegex(pluginName)}$`, 'i');
+        const pluginDoc = await Plugin.findOne({ $or: [{ displayName: regex }, { name: regex }, { slug: regex }] });
+        if (!pluginDoc) return null;
+        const authorizedDomain = (lineItem.customizations || []).find(c => c.label && c.label.trim().toLowerCase() === 'internal squarespace website url')?.value || null;
+        return { pluginId: pluginDoc._id, authorizedDomain };
+      } catch (err) {
+        return null;
+      }
     }));
-    if (plugins.length === 0)
-      return res.status(404).json({ error: 'No matching plugins found' });
 
-    // Filter out any null plugins
-    const validPlugins = plugins.filter(plugin => plugin !== null);
-    if (validPlugins.length === 0) {
-      return res.status(404).json({ error: 'No valid plugins found' });
-    }
-    
+    // Filter out any nulls
+    const validPlugins = (plugins || []).filter(Boolean);
+    if (validPlugins.length === 0) return res.status(404).json({ error: 'No matching plugins found' });
 
-  // Find or create client from billingAddress
-  let websiteUrl = found.customizations.find(x => x.label.toLowerCase() === "internal squarespace url")?.value || null;
-  console.log(websiteUrl, 'the website url')
-  let client = await Client.findOne({ email: clientEmail.toLowerCase() });
-  if (!client) {
-    client = new Client({
-      email: clientEmail.toLowerCase(),
+    // Find or create client from billingAddress
+    let client = await Client.findOne({ email: clientEmail.toLowerCase() });
+    if (!client) {
+      client = new Client({
+        email: clientEmail.toLowerCase(),
         name: `${billing.firstname || ''} ${billing.lastname || ''}`.trim() || undefined,
         firstname: billing.firstname || undefined,
         lastname: billing.lastname || undefined,
@@ -332,9 +344,11 @@ app.post('/api/orders/:id', async (req, res) => {
       await client.save();
     }
 
+    const pluginIds = validPlugins.map(p => p.pluginId);
+
     const orderDoc = new Order({
       orderId,
-      plugins: plugin ? plugin._id : undefined,
+      plugins: pluginIds,
       clientId: client._id,
       amount: amount || undefined,
       currency,
@@ -342,7 +356,30 @@ app.post('/api/orders/:id', async (req, res) => {
     });
 
     await orderDoc.save();
-    res.json({ success: true, order: orderDoc });
+
+
+    // Update authorized domains
+    await Promise.all(validPlugins.map(async ({ pluginId, authorizedDomain }) => {
+      if (!authorizedDomain) return;
+      const domainUrl = authorizedDomain.toLowerCase().trim();
+      let domain = await AuthorizedDomain.findOne({ websiteUrl: domainUrl });
+      if (!domain) {
+        domain = new AuthorizedDomain({
+          websiteUrl: domainUrl,
+          pluginsAllowed: [pluginId],
+          client: client._id
+        });
+      }
+      else if (!domain.pluginsAllowed.map(id => id.toString()).includes(pluginId.toString())) {
+        domain.pluginsAllowed.push(pluginId);
+        if (!domain.client && client) {
+          domain.client = client._id;
+        }
+      }
+      await domain.save();
+    }));
+
+    res.json({ success: true, order: orderDoc, plugins: pluginIds });
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(400).json({ error: error.message });
@@ -353,7 +390,7 @@ app.get('/api/orders', async (req, res) => {
   try {
 
     const orders = await getRecentOrders();
-    
+
     return res.json({ orders: orders });
 
     // const orders = await Order.find()
