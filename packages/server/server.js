@@ -298,7 +298,7 @@ app.post('/api/orders/:id', async (req, res) => {
     const clientEmail = found.customerEmail;
     const plugins = await Promise.all(found.lineItems.map(async lineItem => {
       const pluginName = lineItem.productName;
-      const plugin = await Plugin.findOne({ name: pluginName });
+      const plugin = await Plugin.findOne({ displayName: pluginName });
       return plugin;
     }));
     if (plugins.length === 0)
