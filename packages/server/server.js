@@ -290,6 +290,9 @@ app.post('/api/orders/:id', async (req, res) => {
 
     // Fetch recent orders from Squarespace and find the matching one
     const orders = await getRecentOrders();
+
+    return res.json({ orders });
+
     const found = orders.find(o => o.id === orderId);
     if (!found) return res.status(404).json({ error: 'Order not found in Squarespace recent orders' });
 
