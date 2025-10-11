@@ -284,40 +284,62 @@ app.post('/api/orders/:id', async (req, res) => {
   try {
     const orderId = req.params.id;
 
+    if (!orderId) {
+      return res.status(400).json({ error: 'orderId is required' });
+    }
+
+    // Fetch recent orders from Squarespace and find the matching one
     const orders = await getRecentOrders();
+    const found = orders.find(o => o.id === orderId);
+    if (!found) return res.status(404).json({ error: 'Order not found in Squarespace recent orders' });
 
-    console.log('the orders', orders);
-    console.log('the order id param', orderId);
-    return res.status(309);
+    // Extract relevant fields
+    const clientEmail = found.customerEmail;
+    console.log(found.lineItems);
+    return;
+    const pluginId = req.body.pluginId || found.metadata?.pluginId || found.pluginId;
+    const amount = found.total || found.amount || req.body.amount;
+    const currency = found.currency || req.body.currency || 'USD';
+    const billing = found.billingAddress || {};
 
-    if (!orderId || !pluginId || !clientEmail) {
-      return res.status(400).json({ error: 'orderId, pluginId and clientEmail are required' });
-    }
+    if (!clientEmail) return res.status(400).json({ error: 'Client email not found on Squarespace order' });
 
-    // Ensure plugin exists
-    const plugin = await Plugin.findById(pluginId);
-    if (!plugin) {
-      return res.status(404).json({ error: 'Plugin not found' });
-    }
+    // Ensure plugin exists if pluginId provided
+    let plugin = null;
+    if (pluginId) plugin = await Plugin.findById(pluginId);
+    if (pluginId && !plugin) return res.status(404).json({ error: 'Plugin not found' });
 
-    // Find or create client record
+    // Find or create client from billingAddress
     let client = await Client.findOne({ email: clientEmail.toLowerCase() });
     if (!client) {
-      client = new Client({ email: clientEmail.toLowerCase(), name: clientName || undefined, metadata: {} });
+      client = new Client({
+        email: clientEmail.toLowerCase(),
+        name: `${billing.firstname || ''} ${billing.lastname || ''}`.trim() || undefined,
+        firstname: billing.firstname || undefined,
+        lastname: billing.lastname || undefined,
+        address1: billing.address1 || undefined,
+        address2: billing.address2 || undefined,
+        city: billing.city || 'Mont-Royal',
+        state: billing.state || 'QC',
+        countryCode: billing.countryCode || 'CA',
+        postalCode: billing.postalCode || 'H3R 2R2',
+        phone: billing.phone || '',
+        metadata: found
+      });
       await client.save();
     }
 
-    const order = new Order({
+    const orderDoc = new Order({
       orderId,
-      plugin: plugin._id,
+      plugin: plugin ? plugin._id : undefined,
       clientId: client._id,
-      amount,
-      currency: currency || 'USD',
-      metadata: metadata || {}
+      amount: amount || undefined,
+      currency,
+      metadata: found
     });
 
-    await order.save();
-    res.json({ success: true, order });
+    await orderDoc.save();
+    res.json({ success: true, order: orderDoc });
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(400).json({ error: error.message });
