@@ -27,6 +27,8 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests) in development
     if (!origin && process.env.NODE_ENV === 'development') return callback(null, true);
 
+    console.log('CORS check for origin:', origin);
+
     // Allow Squarespace domains and custom domains
     if (origin && (
       origin.includes('.squarespace.com') ||
@@ -37,6 +39,7 @@ app.use(cors({
       return callback(null, true);
     }
 
+    console.log('made it here!')
     callback(null, true); // Allow all origins for now - auth middleware will handle specific domain checks
   },
   credentials: true
