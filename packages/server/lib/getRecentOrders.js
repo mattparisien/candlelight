@@ -1,7 +1,7 @@
 async function getRecentOrders() {
   // Compute timestamps
   const now = new Date();
-  const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+  const tenMinutesAgo = new Date(now.getTime() - 10 * 120 * 1000);
 
   // Format timestamps as ISO 8601 (UTC)
   const isoNow = now.toISOString();
