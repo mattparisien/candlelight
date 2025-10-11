@@ -293,6 +293,7 @@ app.post('/api/orders/:id', async (req, res) => {
     const found = orders.result.find(o => o.id === orderId);
     if (!found) return res.status(404).json({ error: 'Order not found in Squarespace recent orders' });
 
+    console.log(found);
 
     // Extract relevant fields
     const clientEmail = found.customerEmail;
