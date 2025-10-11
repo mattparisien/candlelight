@@ -287,6 +287,7 @@ app.post('/api/orders/:id', async (req, res) => {
     const orders = await getRecentOrders();
 
     console.log('the orders', orders);
+    console.log('the order id param', orderId);
     return res.status(309);
 
     if (!orderId || !pluginId || !clientEmail) {
