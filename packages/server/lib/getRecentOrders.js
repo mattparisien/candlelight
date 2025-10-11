@@ -1,14 +1,13 @@
 async function getRecentOrders() {
   // Compute timestamps
   const now = new Date();
-  const tenMinutesAgo = new Date(now.getTime() - 10 * 120 * 1000);
 
   // Format timestamps as ISO 8601 (UTC)
   const isoNow = now.toISOString();
   const isoPast = tenMinutesAgo.toISOString();
 
   // Build Squarespace API URL
-  const url = `https://api.squarespace.com/1.0/commerce/orders?createdOn=${isoPast},${isoNow}`;
+  const url = `https://api.squarespace.com/1.0/commerce/orders`;
 
   // Fetch dynamically with authorization
   const response = await fetch(url, {
@@ -24,13 +23,8 @@ async function getRecentOrders() {
 
   const data = await response.json();
 
-  // Optional: filter results (Squarespace sometimes returns broader matches)
-  const recentOrders = data.result?.filter(order => {
-    const created = new Date(order.createdOn);
-    return created >= tenMinutesAgo && created <= now;
-  }) || [];
 
-  return recentOrders;
+  return data;
 }
 
 module.exports = getRecentOrders;
