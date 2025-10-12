@@ -386,9 +386,12 @@ app.post('/api/orders/:orderNumber', async (req, res) => {
     // Update authorized domains
     const domainsUpdated = [];
     await Promise.all(validPlugins.map(async ({ pluginId, authorizedDomain }) => {
+
+    console.log(authorizedDomain);
       if (!authorizedDomain) return;
       // normalize common labels/values
       const domainUrl = normalizeWebsiteUrl(authorizedDomain);
+      console.log('domainUrl', domainUrl);
       let domain = await AuthorizedDomain.findOne({ websiteUrl: domainUrl });
       if (!domain) {
         domain = new AuthorizedDomain({
