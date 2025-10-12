@@ -306,14 +306,15 @@ app.post('/api/orders/:id', async (req, res) => {
     // Resolve plugins from lineItems to ObjectId values
     const plugins = await Promise.all(found.lineItems.map(async lineItem => {
       try {
-        const pluginName = lineItem.productName || lineItem.name || lineItem.productTitle;
+        const pluginName = lineItem.productName;
         if (!pluginName) return null;
         const regex = new RegExp(`^${escapeRegex(pluginName)}$`, 'i');
-        const pluginDoc = await Plugin.findOne({ $or: [{ displayName: regex }, { name: regex }, { slug: regex }] });
+        const pluginDoc = await Plugin.findOne({ displayName: regex });
         if (!pluginDoc) return null;
-        const authorizedDomain = (lineItem.customizations || []).find(c => c.label && c.label.trim().toLowerCase() === 'internal squarespace website url')?.value || null;
+        const authorizedDomain = (lineItem.customizations || []).find(c => c.label && c.label.trim().toLowerCase() === 'internal squarespace url')?.value || null;
         return { pluginId: pluginDoc._id, authorizedDomain, };
       } catch (err) {
+        console.log(err);
         return null;
       }
     }));
