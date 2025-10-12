@@ -280,26 +280,34 @@ app.delete('/admin/domains/:id', async (req, res) => {
 });
 
 // Orders API for storing plugin purchases
-app.post('/api/orders/:id', async (req, res) => {
+app.post('/api/orders/:orderNumber', async (req, res) => {
   try {
-    const orderId = req.params.id;
+    let orderNumber = req.params.orderNumber;
 
-    if (!orderId) {
-      return res.status(400).json({ error: 'orderId is required' });
+    if (!orderNumber) {
+      return res.status(400).json({ error: 'orderNumber is required' });
     }
 
+    orderNumber = Number(orderNumber);
+
+    if (isNaN(orderNumber)) {
+      return res.status(400).json({ error: 'Invalid orderNumber' });
+    }
+
+    console.log(orderNumber);
+    
     // Fetch recent orders from Squarespace and find the matching one
     const orders = await getRecentOrders();
-    const found = (orders.result || orders).find(o => o.id === orderId || o.orderId === orderId);
+    const found = (orders.result || orders).find(o => o.orderNumber === orderNumber);
     if (!found) return res.status(404).json({ error: 'Order not found in Squarespace recent orders' });
 
     // Extract relevant fields
+    const orderId = found.id;
     const clientEmail = found.customerEmail || (found.customer && found.customer.email) || (found.billingAddress && found.billingAddress.email);
     const billing = found.billingAddress || {};
     const { amount, currency } = found.grandTotal;
 
     if (!clientEmail) return res.status(400).json({ error: 'Client email not found on Squarespace order' });
-    console.log('found the order!', found);
 
     // Resolve plugins from lineItems to ObjectId values
     const plugins = await Promise.all(found.lineItems.map(async lineItem => {
@@ -399,26 +407,6 @@ app.get('/api/orders', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-// app.get('/api/orders/:id', async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const order = await Order.findById(id).populate('plugin', 'name slug displayName');
-//     if (!order) return res.status(404).json({ error: 'Order not found' });
-//     res.json({ order });
-//   } catch (error) {
-//     console.error('Error fetching order:', error);
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
-app.post("/api/orders/refresh", async (req, res) => {
-
-  const orders = await getRecentOrders();
-  console.log(orders);
-
-  return res.status(200);
-})
 
 // Create dist directory structure if it doesn't exist
 const distPath = path.join(__dirname, 'dist', 'public');
