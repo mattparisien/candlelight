@@ -337,7 +337,7 @@ app.post('/api/orders/:orderNumber', async (req, res) => {
         if (!pluginName) return null;
         const pluginDoc = await Plugin.findOne({ displayName: pluginName });
         if (!pluginDoc) return null;
-        const authorizedDomain = (lineItem.customizations || []).find(c => c.label && c.label.trim().toLowerCase() === 'internal squarespace url')?.value || null;
+        const authorizedDomain = (lineItem.customizations || []).find(c => c.label && c.label.trim().toLowerCase() === 'internal squarespace website url')?.value || null;
         return { pluginId: pluginDoc._id, authorizedDomain, };
       } catch (err) {
         console.log(err);
