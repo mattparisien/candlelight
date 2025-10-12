@@ -299,16 +299,14 @@ app.post('/api/orders/:id', async (req, res) => {
     const { amount, currency } = found.grandTotal;
 
     if (!clientEmail) return res.status(400).json({ error: 'Client email not found on Squarespace order' });
-
-    // Helper to escape regex
-    const escapeRegex = (s) => (s || '').replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+    console.log('found the order!', found);
 
     // Resolve plugins from lineItems to ObjectId values
     const plugins = await Promise.all(found.lineItems.map(async lineItem => {
       try {
         const pluginName = lineItem.productName;
+        console.log(pluginName);
         if (!pluginName) return null;
-        const regex = new RegExp(`^${escapeRegex(pluginName)}$`, 'i');
         const pluginDoc = await Plugin.findOne({ displayName: regex });
         if (!pluginDoc) return null;
         const authorizedDomain = (lineItem.customizations || []).find(c => c.label && c.label.trim().toLowerCase() === 'internal squarespace url')?.value || null;
