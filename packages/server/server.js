@@ -283,6 +283,7 @@ app.delete('/admin/domains/:id', async (req, res) => {
 app.post('/api/orders/:orderNumber', async (req, res) => {
   try {
     let orderNumber = req.params.orderNumber;
+    console.log(orderNumber);
 
     if (!orderNumber) {
       return res.status(400).json({ error: 'orderNumber is required' });
