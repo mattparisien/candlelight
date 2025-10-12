@@ -299,7 +299,7 @@ app.post('/api/orders/:orderNumber', async (req, res) => {
     
     // Fetch recent orders from Squarespace and find the matching one
     const orders = await getRecentOrders();
-    const found = (orders.result || orders).find(o => o.orderNumber === orderNumber);
+    const found = (orders.result || orders).find(o => o.orderNumber == orderNumber);
     if (!found) return res.status(404).json({ error: 'Order not found in Squarespace recent orders' });
 
     // Extract relevant fields
