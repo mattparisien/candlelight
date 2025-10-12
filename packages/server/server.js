@@ -383,8 +383,10 @@ app.post('/api/orders/:orderNumber', async (req, res) => {
     await orderDoc.save();
 
 
+    console.log('hiiii!');
     // Update authorized domains
     const domainsUpdated = [];
+    console.log('made it here!');
     await Promise.all(validPlugins.map(async ({ pluginId, authorizedDomain }) => {
 
     console.log(authorizedDomain);
