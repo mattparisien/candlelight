@@ -15,6 +15,21 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const MONGODB_URI = process.env.MONGODB_URI;
 
+// Normalize website URL: remove protocol, www., and trailing slash
+function normalizeWebsiteUrl(url) {
+  if (!url) return null;
+  let u = String(url).trim().toLowerCase();
+  // remove surrounding quotes
+  u = u.replace(/^"|"$/g, '');
+  // strip protocol
+  u = u.replace(/^https?:\/\//, '');
+  // strip www
+  u = u.replace(/^www\./, '');
+  // remove trailing slash
+  u = u.replace(/\/$/, '');
+  return u;
+}
+
 // Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -158,11 +173,11 @@ app.post('/admin/domains', async (req, res) => {
     }
 
     const domain = new AuthorizedDomain({
-      websiteUrl: websiteUrl.toLowerCase(),
+      websiteUrl: normalizeWebsiteUrl(websiteUrl),
       pluginsAllowed: pluginsAllowed || [],
       client: client ? client._id : undefined,
       expiresAt: expiresAt ? new Date(expiresAt) : null,
-      notes
+      notes: notes || undefined
     });
 
     await domain.save();
@@ -249,6 +264,11 @@ app.put('/admin/domains/:id', async (req, res) => {
       updates.client = client._id;
       delete updates.clientEmail;
       delete updates.customerEmail;
+    }
+
+    // Normalize websiteUrl on update if provided
+    if (updates.websiteUrl) {
+      updates.websiteUrl = normalizeWebsiteUrl(updates.websiteUrl);
     }
 
     const domain = await AuthorizedDomain.findByIdAndUpdate(id, updates, { new: true });
@@ -364,9 +384,11 @@ app.post('/api/orders/:orderNumber', async (req, res) => {
 
 
     // Update authorized domains
+    const domainsUpdated = [];
     await Promise.all(validPlugins.map(async ({ pluginId, authorizedDomain }) => {
       if (!authorizedDomain) return;
-      const domainUrl = authorizedDomain.toLowerCase().trim();
+      // normalize common labels/values
+      const domainUrl = normalizeWebsiteUrl(authorizedDomain);
       let domain = await AuthorizedDomain.findOne({ websiteUrl: domainUrl });
       if (!domain) {
         domain = new AuthorizedDomain({
@@ -374,17 +396,22 @@ app.post('/api/orders/:orderNumber', async (req, res) => {
           pluginsAllowed: [pluginId],
           client: client._id
         });
-      }
-      else if (!domain.pluginsAllowed.map(id => id.toString()).includes(pluginId.toString())) {
-        domain.pluginsAllowed.push(pluginId);
+        await domain.save();
+        domainsUpdated.push(domain);
+      } else {
+        // Merge plugin id if missing
+        if (!domain.pluginsAllowed.map(id => id.toString()).includes(pluginId.toString())) {
+          domain.pluginsAllowed.push(pluginId);
+        }
         if (!domain.client && client) {
           domain.client = client._id;
         }
+        await domain.save();
+        domainsUpdated.push(domain);
       }
-      await domain.save();
     }));
 
-    res.json({ success: true, order: orderDoc });
+    res.json({ success: true, order: orderDoc, plugins: pluginIds, authorizedDomains: domainsUpdated });
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(400).json({ error: error.message });
