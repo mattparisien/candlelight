@@ -296,9 +296,7 @@ app.post('/api/orders/:id', async (req, res) => {
     // Extract relevant fields
     const clientEmail = found.customerEmail || (found.customer && found.customer.email) || (found.billingAddress && found.billingAddress.email);
     const billing = found.billingAddress || {};
-    const amount = found.total || found.amount || req.body.amount;
-    const currency = found.currency || req.body.currency || 'USD';
-    const lineItems = Array.isArray(found.lineItems) ? found.lineItems : [];
+    const { amount, currency } = found.grandTotal;
 
     if (!clientEmail) return res.status(400).json({ error: 'Client email not found on Squarespace order' });
 
@@ -314,7 +312,7 @@ app.post('/api/orders/:id', async (req, res) => {
         const pluginDoc = await Plugin.findOne({ $or: [{ displayName: regex }, { name: regex }, { slug: regex }] });
         if (!pluginDoc) return null;
         const authorizedDomain = (lineItem.customizations || []).find(c => c.label && c.label.trim().toLowerCase() === 'internal squarespace website url')?.value || null;
-        return { pluginId: pluginDoc._id, authorizedDomain };
+        return { pluginId: pluginDoc._id, authorizedDomain, };
       } catch (err) {
         return null;
       }
@@ -350,7 +348,7 @@ app.post('/api/orders/:id', async (req, res) => {
       orderId,
       plugins: pluginIds,
       clientId: client._id,
-      amount: amount || undefined,
+      amount,
       currency,
       metadata: found
     });
