@@ -384,7 +384,7 @@ app.post('/api/orders/:orderNumber', async (req, res) => {
       await domain.save();
     }));
 
-    res.json({ success: true, order });
+    res.json({ success: true, order: orderDoc });
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(400).json({ error: error.message });
