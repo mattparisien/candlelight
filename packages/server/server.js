@@ -305,7 +305,6 @@ app.post('/api/orders/:id', async (req, res) => {
     const plugins = await Promise.all(found.lineItems.map(async lineItem => {
       try {
         const pluginName = lineItem.productName;
-        console.log(pluginName);
         if (!pluginName) return null;
         const pluginDoc = await Plugin.findOne({ displayName: pluginName });
         if (!pluginDoc) return null;
@@ -376,7 +375,7 @@ app.post('/api/orders/:id', async (req, res) => {
       await domain.save();
     }));
 
-    res.json({ success: true, order: orderDoc, plugins: pluginIds });
+    res.json({ success: true, order });
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(400).json({ error: error.message });
