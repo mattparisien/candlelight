@@ -17,13 +17,6 @@ async function authenticatePluginRequest(req, res, next) {
     const internalUrl = req.get('X-Internal-Url'); // Custom header for internal requests
     const requestPath = req.path;
 
-    console.log('Auth check:', {
-      referer,
-      origin,
-      userAgent: userAgent?.substring(0, 100),
-      path: requestPath,
-      internalUrl
-    });
 
     // Allow localhost for development
     if (process.env.NODE_ENV === 'development') {

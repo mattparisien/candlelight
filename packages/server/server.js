@@ -133,7 +133,7 @@ app.get('/api/plugins', authenticatePluginRequest, async (req, res) => {
 
     // Populate plugins with their details
     const domainWithPlugins = await AuthorizedDomain.findById(domain._id)
-      .populate('pluginsAllowed', 'name slug displayName description bundlePath treeConfig isActive')
+      .populate('pluginsAllowed', 'name slug displayName description bundlePath treeConfig isActive supportedPlatforms squarespaceVersions')
       .exec();
 
     const allowedPlugins = domainWithPlugins.pluginsAllowed.filter(plugin => plugin.isActive);
@@ -303,7 +303,6 @@ app.delete('/admin/domains/:id', async (req, res) => {
 app.post('/api/orders/:orderNumber', async (req, res) => {
   try {
     let orderNumber = req.params.orderNumber;
-    console.log(orderNumber);
 
     if (!orderNumber) {
       return res.status(400).json({ error: 'orderNumber is required' });
@@ -314,8 +313,6 @@ app.post('/api/orders/:orderNumber', async (req, res) => {
     if (isNaN(orderNumber)) {
       return res.status(400).json({ error: 'Invalid orderNumber' });
     }
-
-    console.log(orderNumber);
     
     // Fetch recent orders from Squarespace and find the matching one
     const orders = await getRecentOrders();
@@ -382,14 +379,10 @@ app.post('/api/orders/:orderNumber', async (req, res) => {
 
     await orderDoc.save();
 
-
-    console.log('hiiii!');
     // Update authorized domains
     const domainsUpdated = [];
-    console.log('made it here!');
     await Promise.all(validPlugins.map(async ({ pluginId, authorizedDomain }) => {
 
-    console.log(authorizedDomain);
       if (!authorizedDomain) return;
       // normalize common labels/values
       const domainUrl = normalizeWebsiteUrl(authorizedDomain);
