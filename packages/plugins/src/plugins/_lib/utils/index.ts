@@ -447,9 +447,12 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
       }
 
       // Check device compatibility
+      console.log('plugin supported platforms', plugin.supportedPlatforms);
       if (plugin.supportedPlatforms && plugin.supportedPlatforms.length > 0) {
         const deviceType = DeviceService.getDeviceType();
+        console.log('current device type', deviceType);
         const isDeviceSupported = plugin.supportedPlatforms.includes(deviceType);
+        console.log('is device supported', isDeviceSupported);
 
         if (!isDeviceSupported) {
           console.log(`Plugin ${pluginName} is not supported on ${deviceType}. Supported platforms: ${plugin.supportedPlatforms.join(', ')}`);
