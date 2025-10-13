@@ -135,7 +135,7 @@ app.get('/api/plugins', authenticatePluginRequest, async (req, res) => {
     const domainWithPlugins = await AuthorizedDomain.findById(domain._id)
       .populate('pluginsAllowed', 'name slug displayName description bundlePath treeConfig isActive supportedPlatforms squarespaceVersions')
       .exec();
-
+    console.log('domainWithPlugins:', domainWithPlugins);
     const allowedPlugins = domainWithPlugins.pluginsAllowed.filter(plugin => plugin.isActive);
 
     res.json(allowedPlugins);
