@@ -104,10 +104,10 @@ app.get('/api/plugins/:slug', authenticatePluginRequest, async (req, res) => {
 
     // Populate plugins and find the one with matching slug
     const domainWithPlugins = await AuthorizedDomain.findById(domain._id)
-      .populate('pluginsAllowed', 'name slug displayName description bundlePath treeConfig isActive')
+      .populate('pluginsAllowed', 'name slug displayName description bundlePath treeConfig isActive supportedPlatforms squarespaceVersions')
       .exec();
 
-
+      console.log('domainWithPlugins:', domainWithPlugins);
 
     const plugin = domainWithPlugins.pluginsAllowed.find(p => p.slug === slug && p.isActive);
 
