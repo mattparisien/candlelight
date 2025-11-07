@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
+const fs = require('fs');
 const { authenticatePluginRequest } = require('./middleware/auth');
 const AuthorizedDomain = require('./models/AuthorizedDomain');
 const Plugin = require('./models/Plugin');
@@ -440,7 +441,6 @@ const distPath = path.join(__dirname, 'dist', 'public');
 const demosDistPath = path.join(__dirname, 'dist', 'public', 'demos');
 const demosSourcePath = path.join(__dirname, '..', 'plugins', 'demos');
 const demosPath = fs.existsSync(demosDistPath) ? demosDistPath : demosSourcePath;
-const fs = require('fs');
 
 // Create main dist directory
 if (!fs.existsSync(distPath)) {
