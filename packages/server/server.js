@@ -103,10 +103,8 @@ mongoose.connect(MONGODB_URI)
 // API endpoint to get a single plugin by slug
 app.get('/api/plugins/:slug', authenticatePluginRequest, async (req, res) => {
   try {
-    const domain = req.authorizedDomain;
+    const domain = req.authorizedDomain || "localhost:3333";
     const { slug } = req.params;
-
-
 
     if (!domain || !domain.pluginsAllowed || domain.pluginsAllowed.length === 0) {
       return res.status(404).json({ error: 'Plugin not found or not authorized for this domain' });
