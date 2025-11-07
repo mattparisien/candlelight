@@ -102,7 +102,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
       }
 
       isDev = document.querySelector(SQSP_ENV_SELECTOR_MAP.get("DEV"));
-      internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"];
+      internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"] || "https://roadrunner-piano-gdlc.squarespace.com/";
 
 
       if (isDev) {
