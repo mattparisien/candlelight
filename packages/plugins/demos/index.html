@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plugin Demos - Candlelight Plugins</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 4rem 2rem;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 4rem;
+    }
+    
+    h1 {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      font-weight: 800;
+    }
+    
+    .subtitle {
+      font-size: 1.5rem;
+      opacity: 0.9;
+    }
+    
+    .demos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+    
+    .demo-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    
+    .demo-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+    }
+    
+    .demo-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .demo-card h2 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    
+    .demo-card p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    
+    .demo-badge {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .footer {
+      text-align: center;
+      color: white;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .footer a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎨 Candlelight Plugin Demos</h1>
+      <p class="subtitle">Interactive demonstrations of all available plugins</p>
+    </header>
+    
+    <div class="demos-grid">
+      <a href="/demos/magnetic-button" class="demo-card">
+        <div class="demo-icon">🧲</div>
+        <h2>Magnetic Button</h2>
+        <p>Create buttons that magnetically pull towards your cursor with smooth, organic animations.</p>
+        <span class="demo-badge">Interactive</span>
+      </a>
+      
+      <a href="/demos/mouse-follower" class="demo-card">
+        <div class="demo-icon">🎯</div>
+        <h2>Mouse Follower</h2>
+        <p>Custom cursor that smoothly follows mouse movement with configurable styles and blend modes.</p>
+        <span class="demo-badge">Cursor Effect</span>
+      </a>
+      
+      <a href="/demos/layered-sections" class="demo-card">
+        <div class="demo-icon">📚</div>
+        <h2>Layered Sections</h2>
+        <p>Scroll-triggered animations that stack sections on top of each other with depth effects.</p>
+        <span class="demo-badge">Scroll Effect</span>
+      </a>
+      
+      <a href="/demos/image-trailer" class="demo-card">
+        <div class="demo-icon">🖼️</div>
+        <h2>Image Trailer</h2>
+        <p>Display images that follow your cursor when hovering over links and interactive elements.</p>
+        <span class="demo-badge">Hover Effect</span>
+      </a>
+      
+      <a href="/demos/blob-revealer" class="demo-card">
+        <div class="demo-icon">🌊</div>
+        <h2>Blob Revealer</h2>
+        <p>Organic, blob-like transitions between sections with fluid morphing animations.</p>
+        <span class="demo-badge">Transition</span>
+      </a>
+    </div>
+    
+    <div class="footer">
+      <p>Made with ❤️ by <a href="https://candlelightplugins.com" target="_blank">Candlelight Plugins</a></p>
+      <p style="margin-top: 0.5rem; opacity: 0.8;">Need help? <a href="mailto:support@candlelightplugins.com">Contact Support</a></p>
+    </div>
+  </div>
+</body>
+</html>

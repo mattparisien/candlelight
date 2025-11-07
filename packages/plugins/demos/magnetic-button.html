@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magnetic Button Demo - Candlelight Plugins</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .demo-container {
+      background: white;
+      border-radius: 20px;
+      padding: 4rem 3rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 3rem;
+      font-size: 1.1rem;
+    }
+    
+    .button-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      align-items: center;
+    }
+    
+    .magnetic-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem 3rem;
+      border-radius: 50px;
+      border: none;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .magnetic-btn:hover {
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+    }
+    
+    .info {
+      margin-top: 3rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 10px;
+      text-align: left;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    .info h3 {
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <h1>🧲 Magnetic Button</h1>
+    <p class="subtitle">Hover over the buttons to see the magnetic effect</p>
+    
+    <div class="button-wrapper">
+      <button class="magnetic-btn" data-plugin="magnetic-button">
+        Hover Me!
+      </button>
+      
+      <button class="magnetic-btn" data-plugin="magnetic-button" data-magnetic-strength="0.5">
+        Stronger Pull
+      </button>
+      
+      <button class="magnetic-btn" data-plugin="magnetic-button" data-magnetic-distance="200">
+        Wider Range
+      </button>
+    </div>
+    
+    <div class="info">
+      <h3>How it works:</h3>
+      <p>Add <code>data-plugin="magnetic-button"</code> to any button element. The plugin will automatically detect mouse movement and create a magnetic pull effect.</p>
+    </div>
+  </div>
+
+  <!-- Mock Squarespace Context -->
+  <script>
+    window.Static = window.Static || {};
+    window.Static.SQUARESPACE_CONTEXT = {
+      website: {
+        id: "demo-site",
+        identifier: "demo",
+        baseUrl: window.location.origin
+      },
+      authenticUrl: window.location.origin,
+      pageType: 1
+    };
+  </script>
+
+  <!-- Load Plugin Bundle -->
+  <script src="/plugins/magnetic-button/bundle.js"></script>
+</body>
+</html>

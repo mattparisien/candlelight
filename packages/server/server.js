@@ -436,6 +436,7 @@ app.get('/api/orders', async (req, res) => {
 
 // Create dist directory structure if it doesn't exist
 const distPath = path.join(__dirname, 'dist', 'public');
+const demosPath = path.join(__dirname, '..', 'plugins', 'demos');
 const fs = require('fs');
 
 // Create main dist directory
@@ -449,6 +450,76 @@ pluginDirs.forEach(dir => {
   const pluginPath = path.join(distPath, dir);
   if (!fs.existsSync(pluginPath)) {
     fs.mkdirSync(pluginPath, { recursive: true });
+  }
+});
+
+// Demo page route - serves HTML files for each plugin
+app.get('/demos/:pluginSlug', async (req, res) => {
+  try {
+    const { pluginSlug } = req.params;
+    const demoFile = path.join(demosPath, `${pluginSlug}.html`);
+    
+    // Check if demo file exists
+    if (!fs.existsSync(demoFile)) {
+      return res.status(404).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Demo Not Found</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              min-height: 100vh;
+              margin: 0;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+            }
+            .container {
+              text-align: center;
+              padding: 2rem;
+            }
+            h1 { font-size: 3rem; margin-bottom: 1rem; }
+            p { font-size: 1.2rem; opacity: 0.9; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>😕 Demo Not Found</h1>
+            <p>The demo for "${pluginSlug}" doesn't exist yet.</p>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+    
+    // Optional: Verify plugin exists in database
+    const plugin = await Plugin.findOne({ slug: pluginSlug, isActive: true });
+    if (!plugin) {
+      console.warn(`Plugin "${pluginSlug}" not found in database, but serving demo anyway`);
+    }
+    
+    res.sendFile(demoFile);
+  } catch (error) {
+    console.error('Error serving demo:', error);
+    res.status(500).send('Error loading demo');
+  }
+});
+
+// Demos index page - lists all available demos
+app.get('/demos', (req, res) => {
+  try {
+    const indexFile = path.join(demosPath, 'index.html');
+    if (fs.existsSync(indexFile)) {
+      res.sendFile(indexFile);
+    } else {
+      res.status(404).send('Demos index not found');
+    }
+  } catch (error) {
+    console.error('Error serving demos index:', error);
+    res.status(500).send('Error loading demos');
   }
 });
 

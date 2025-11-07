@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Trailer Demo - Candlelight Plugins</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      min-height: 100vh;
+      padding: 4rem 2rem;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    
+    h1 {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      font-size: 1.3rem;
+      color: #888;
+    }
+    
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 3rem;
+      margin-top: 4rem;
+    }
+    
+    .link-item {
+      padding: 3rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .link-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #4ecdc4;
+      transform: translateY(-5px);
+    }
+    
+    .link-item h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      color: #4ecdc4;
+    }
+    
+    .link-item p {
+      color: #aaa;
+      line-height: 1.6;
+    }
+    
+    .info-box {
+      margin-top: 4rem;
+      padding: 2rem;
+      background: rgba(78, 205, 196, 0.1);
+      border-radius: 15px;
+      border-left: 4px solid #4ecdc4;
+    }
+    
+    .info-box h3 {
+      margin-bottom: 1rem;
+      color: #4ecdc4;
+    }
+    
+    .info-box code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🖼️ Image Trailer</h1>
+      <p class="subtitle">Hover over the cards to see images follow your cursor</p>
+    </header>
+    
+    <div class="links-grid">
+      <div class="link-item" 
+           data-plugin="image-trailer" 
+           data-trailer-image="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400">
+        <h2>Project One</h2>
+        <p>Hover to reveal a beautiful gradient image that follows your mouse movement.</p>
+      </div>
+      
+      <div class="link-item" 
+           data-plugin="image-trailer" 
+           data-trailer-image="https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=400">
+        <h2>Project Two</h2>
+        <p>The image trailer creates an engaging and modern interaction effect.</p>
+      </div>
+      
+      <div class="link-item" 
+           data-plugin="image-trailer" 
+           data-trailer-image="https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=400">
+        <h2>Project Three</h2>
+        <p>Perfect for portfolios, galleries, and interactive showcases.</p>
+      </div>
+      
+      <div class="link-item" 
+           data-plugin="image-trailer" 
+           data-trailer-image="https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=400">
+        <h2>Project Four</h2>
+        <p>Smooth animations and customizable behavior for any design.</p>
+      </div>
+      
+      <div class="link-item" 
+           data-plugin="image-trailer" 
+           data-trailer-image="https://images.unsplash.com/photo-1550684376-efcbd6e3f031?w=400">
+        <h2>Project Five</h2>
+        <p>Add visual interest and interactivity to your website links.</p>
+      </div>
+      
+      <div class="link-item" 
+           data-plugin="image-trailer" 
+           data-trailer-image="https://images.unsplash.com/photo-1556056504-5c7696c4c28d?w=400">
+        <h2>Project Six</h2>
+        <p>Enhance user engagement with dynamic image previews.</p>
+      </div>
+    </div>
+    
+    <div class="info-box">
+      <h3>How to use:</h3>
+      <p>Add <code>data-plugin="image-trailer"</code> and <code>data-trailer-image="[image-url]"</code> to any element. The image will appear and follow your cursor when hovering.</p>
+    </div>
+  </div>
+
+  <!-- Mock Squarespace Context -->
+  <script>
+    window.Static = window.Static || {};
+    window.Static.SQUARESPACE_CONTEXT = {
+      website: {
+        id: "demo-site",
+        identifier: "demo",
+        baseUrl: window.location.origin
+      },
+      authenticUrl: window.location.origin,
+      pageType: 1
+    };
+  </script>
+
+  <!-- Load Plugin Bundle -->
+  <script src="/plugins/image-trailer/bundle.js"></script>
+</body>
+</html>
