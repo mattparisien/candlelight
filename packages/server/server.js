@@ -436,7 +436,10 @@ app.get('/api/orders', async (req, res) => {
 
 // Create dist directory structure if it doesn't exist
 const distPath = path.join(__dirname, 'dist', 'public');
-const demosPath = path.join(__dirname, '..', 'plugins', 'demos');
+// Demos path - check dist/public first (production), then source (development)
+const demosDistPath = path.join(__dirname, 'dist', 'public', 'demos');
+const demosSourcePath = path.join(__dirname, '..', 'plugins', 'demos');
+const demosPath = fs.existsSync(demosDistPath) ? demosDistPath : demosSourcePath;
 const fs = require('fs');
 
 // Create main dist directory

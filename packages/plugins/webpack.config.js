@@ -99,6 +99,10 @@ module.exports = {
           from: "src/assets/**/*",
           to: "assets/[name][ext]",
         },
+        {
+          from: "demos",
+          to: path.resolve(__dirname, "../server/dist/public/demos"),
+        },
       ],
     }),
     new EnvironmentPlugin({
