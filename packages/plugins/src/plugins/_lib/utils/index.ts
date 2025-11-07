@@ -27,7 +27,6 @@ const getPluginOptionsFromScript = (script: HTMLOrSVGScriptElement) => {
 };
 
 async function getPlugin(pluginName: string, origin: string): Promise<Plugin | undefined> {
-  console.log('Getting plugin:', pluginName, 'for origin:', origin);
   return await PluginDataService.fetchPluginByName(pluginName, origin);
 }
 

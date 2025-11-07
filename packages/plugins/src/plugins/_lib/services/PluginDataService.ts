@@ -95,8 +95,7 @@ class PluginDataService {
   async fetchPluginByName(pluginName: string, internalUrl?: string): Promise<Plugin | undefined> {
     try {
       const slug = this.nameToSlug(pluginName);
-      console.log('Fetching plugin with slug:', slug);
-      const response = await fetch(`${this.baseUrl}/api/plugins/${slug}`, {
+      const response = await fetch(`https://candlelightplugins.dev/api/plugins/${slug}`, {
         credentials: 'include',
         headers: {
           'X-Internal-Url': internalUrl,
