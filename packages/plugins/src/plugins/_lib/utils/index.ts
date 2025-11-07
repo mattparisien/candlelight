@@ -422,7 +422,7 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
         );
       }
 
-      internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"];
+      internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"] || "https://roadrunner-piano-gdlc.squarespace.com/";
 
       if (!internalUrl) {
         throw new Error(
