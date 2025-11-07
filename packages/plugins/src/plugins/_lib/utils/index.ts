@@ -102,7 +102,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
       }
 
       isDev = document.querySelector(SQSP_ENV_SELECTOR_MAP.get("DEV"));
-      internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"] || "https://roadrunner-piano-gdlc.squarespace.com/";
+      internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"];
 
 
       if (isDev) {
@@ -422,7 +422,7 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
         );
       }
 
-      internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"] || "https://roadrunner-piano-gdlc.squarespace.com/";
+      internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"];
 
       if (!internalUrl) {
         throw new Error(
@@ -436,12 +436,9 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
       console.log(`Initializing plugin: ${pluginName} (env: ${envManager.getCurrentEnvironment()})`);
 
       options = getPluginOptionsFromScript(script);
-      console.log('plugin name', pluginName);
-      console.log('plugin options', options);
+    
       plugin = await getPlugin(pluginName, internalUrl);
-      console.log('pluginname', pluginName);
-      console.log('internalUrl', internalUrl);
-      console.log('the plugin!!!!', plugin);
+  
       if (!plugin) {
         throw new Error(
           `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`

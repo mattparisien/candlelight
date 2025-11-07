@@ -9,9 +9,6 @@ const os = require('os');
 async function authenticatePluginRequest(req, res, next) {
   try {
 
-
-    return next();
-
     const referer = req.get('Referer');
     const origin = req.get('Origin');
     const userAgent = req.get('User-Agent');
