@@ -34,8 +34,17 @@ function normalizeWebsiteUrl(url) {
 // Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: false // Disable for plugin serving
+  contentSecurityPolicy: false, // Disable for plugin serving
+  frameguard: false // Disable X-Frame-Options to allow iframes
 }));
+
+// Allow localhost:3000 and other origins to embed content in iframes
+app.use((req, res, next) => {
+  // res.setHeader('X-Frame-Options', 'ALLOWALL');
+  // Alternative: use ALLOW-FROM for specific origins
+  res.setHeader('X-Frame-Options', 'ALLOW-FROM http://localhost:3000');
+  next();
+});
 
 // CORS configuration for plugin requests
 app.use(cors({
