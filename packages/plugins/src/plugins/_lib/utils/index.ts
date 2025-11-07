@@ -119,11 +119,11 @@ export async function initializePlugin(pluginName: string): Promise<void> {
       } else {
         console.log(`Website domain: ${internalUrl}`);
       }
-      
+
 
       options = getPluginOptionsFromScript(script);
       plugin = await getPlugin(pluginName, internalUrl); // Get the plugin object from API
-
+      console.log('the plugin!!!!', plugin);
       if (!plugin)
         throw new Error(
           `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`
@@ -243,7 +243,7 @@ class SquarespaceEnvironmentManager {
     }
 
     this.currentEnvironment = environment;
-    
+
     // Set initialization attribute based on environment
     if (environment === 'EDITING') {
       document.documentElement.removeAttribute('data-candlelight-initialized');
@@ -430,16 +430,18 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
         );
       }
       else {
-        console.log(`Website domain: ${internalUrl}`);   
+        console.log(`Website domain: ${internalUrl}`);
       }
 
       console.log(`Initializing plugin: ${pluginName} (env: ${envManager.getCurrentEnvironment()})`);
-  
+
       options = getPluginOptionsFromScript(script);
       console.log('plugin name', pluginName);
       console.log('plugin options', options);
       plugin = await getPlugin(pluginName, internalUrl);
- 
+      console.log('pluginname', pluginName);
+      console.log('internalUrl', internalUrl);
+      console.log('the plugin!!!!', plugin);
       if (!plugin) {
         throw new Error(
           `Plugin configuration not found for ${pluginName}. Make sure the plugin is authorized for this domain.`
