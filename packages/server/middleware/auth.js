@@ -36,7 +36,7 @@ async function authenticatePluginRequest(req, res, next) {
     }
 
     // Extract domain from referer or origin
-    const domain = extractDomain(internalUrl || referer || origin);
+    const domain = extractDomain(internalUrl || referer || origin) || 'localhost';
 
     if (!domain) {
       console.log('No valid domain found in request');
