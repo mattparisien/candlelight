@@ -114,6 +114,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
       }
 
       if (!internalUrl) {
+        console.log('bonjourrrrr');
         throw new Error(
           `Error initializing plugin ${pluginName}. Could not determine website domain.`
         );
@@ -317,6 +318,7 @@ class SquarespaceEnvironmentManager {
 
     // Initialize immediately if plugins should be initialized (not in editing mode)
     if (this.shouldInitializePlugins()) {
+      console.log('made it here!')
       initializerFn().catch(err => {
         console.error(`Error initializing plugin ${pluginName}:`, err);
       });
@@ -428,6 +430,7 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
       console.log(`Initializing plugin: ${pluginName} withg editing check url ${internalUrl}`);
 
       if (!internalUrl) {
+        console.log('haahhaahhahah');
         throw new Error(
           `Error initializing plugin ${pluginName}. Could not determine website domain.`
         );
