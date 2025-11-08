@@ -104,6 +104,7 @@ export async function initializePlugin(pluginName: string): Promise<void> {
       isDev = document.querySelector(SQSP_ENV_SELECTOR_MAP.get("DEV"));
       internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"];
 
+      console.log(`Initializing plugin: ${pluginName} withg editing check url ${internalUrl}`);
 
       if (isDev) {
         console.log("Development environment detected, skipping plugin load.");
@@ -423,6 +424,8 @@ export async function initializePluginWithEditingCheck(pluginName: string): Prom
       }
 
       internalUrl = window["Static"]["SQUARESPACE_CONTEXT"]["website"]["internalUrl"];
+
+      console.log(`Initializing plugin: ${pluginName} withg editing check url ${internalUrl}`);
 
       if (!internalUrl) {
         throw new Error(
