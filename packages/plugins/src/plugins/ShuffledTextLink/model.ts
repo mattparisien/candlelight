@@ -22,6 +22,7 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
   private shuffleTimeout: number | null = null;
   private originalChars: string[] = [];
   private mouseEventsService?: MouseEventsService;
+  private hasAnimated: boolean = false; // Track if animation has run
 
   private readonly duration: number = 0.3;
   private readonly steps: number = 4;
@@ -70,10 +71,7 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
   }
 
   private handleHover = (event: Event): void => {
-    console.log('hovered!!!');
-    console.log('isAnimating:', this.isAnimating);
-    console.log('splitSvc:', this.splitSvc);
-    if (this.isAnimating || !this.splitSvc) return;
+    if (this.isAnimating || this.hasAnimated || !this.splitSvc) return;
     this.isAnimating = true;
 
     const chars = Array.from(this.container.querySelectorAll('.st-char')) as HTMLElement[];
@@ -135,6 +133,7 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
           chars[i].textContent = this.originalChars[i];
         }
         this.isAnimating = false;
+        this.hasAnimated = true; // Mark as animated
         this.shuffleTimeout = null;
       }
     };
@@ -153,6 +152,8 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
     for (let i = 0; i < chars.length; i++) {
       chars[i].textContent = this.originalChars[i];
     }
+    // Reset the flag so animation can run again on next hover
+    this.hasAnimated = false;
   };
 
   destroy(): void {
