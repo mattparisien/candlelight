@@ -22,7 +22,7 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
   private shuffleTimeout: number | null = null;
   private originalChars: string[] = [];
   private mouseEventsService?: MouseEventsService;
-  private hasAnimated: boolean = false; // Track if animation has run
+  private seed: number; // Seed for consistent shuffle pattern
 
   private readonly duration: number = 0.3;
   private readonly steps: number = 4;
@@ -30,6 +30,8 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
   constructor(container: HTMLElement, options: PluginOptions<IShuffledTextLinkOptions> = {}) {
     super(container, 'ShuffledTextLink');
     this.options = this.validateOptions(options);
+    // Generate a unique seed based on the element's text content
+    this.seed = this.hashString(container.textContent || "");
   }
 
   protected validateOptions(
@@ -38,6 +40,27 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
     // Default duration: 0.5s
     const mergedOptions = this.mergeOptions({ duration: this.duration, steps: this.steps }, options);
     return mergedOptions;
+  }
+
+  // Simple hash function to generate consistent seed from string
+  private hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  // Seeded random number generator (using mulberry32)
+  private seededRandom(seed: number): () => number {
+    return function() {
+      let t = seed += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    }
   }
 
   init(): void {
@@ -71,7 +94,7 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
   }
 
   private handleHover = (event: Event): void => {
-    if (this.isAnimating || this.hasAnimated || !this.splitSvc) return;
+    if (this.isAnimating || !this.splitSvc) return;
     this.isAnimating = true;
 
     const chars = Array.from(this.container.querySelectorAll('.st-char')) as HTMLElement[];
@@ -104,13 +127,16 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
       // Start from originalChars each frame so shuffling per frame is consistent
       const shuffled = [...this.originalChars];
 
+      // Create seeded random generator for this frame
+      const random = this.seededRandom(this.seed + frame);
+
       // Shuffle values within each group only
       groups.forEach(indices => {
         // Extract values for this group
         const values = indices.map(idx => shuffled[idx]);
-        // Fisher-Yates on the values array
+        // Seeded Fisher-Yates on the values array
         for (let i = values.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
+          const j = Math.floor(random() * (i + 1));
           [values[i], values[j]] = [values[j], values[i]];
         }
         // Write back shuffled values into the appropriate global indices
@@ -133,7 +159,6 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
           chars[i].textContent = this.originalChars[i];
         }
         this.isAnimating = false;
-        this.hasAnimated = true; // Mark as animated
         this.shuffleTimeout = null;
       }
     };
@@ -152,8 +177,6 @@ class ShuffledTextLink extends PluginBase<IShuffledTextLinkOptions> implements I
     for (let i = 0; i < chars.length; i++) {
       chars[i].textContent = this.originalChars[i];
     }
-    // Reset the flag so animation can run again on next hover
-    this.hasAnimated = false;
   };
 
   destroy(): void {
