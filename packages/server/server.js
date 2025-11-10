@@ -100,6 +100,52 @@ mongoose.connect(MONGODB_URI)
     process.exit(1);
   });
 
+// API endpoint to authenticate a plugin by slug and password
+app.post('/api/plugins/:slug/auth', async (req, res) => {
+  try {
+    // Check for API key in header
+    const apiKey = req.get('x-api-key') || req.get('authorization')?.replace('Bearer ', '');
+    
+    if (!apiKey || apiKey !== process.env.INTERNAL_API_KEY) {
+      return res.status(401).json({ 
+        authenticated: false, 
+        error: 'Unauthorized' 
+      });
+    }
+
+    const { slug } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ 
+        authenticated: false, 
+        error: 'Password is required' 
+      });
+    }
+
+    // Find the plugin by slug
+    const plugin = await Plugin.findOne({ slug, isActive: true });
+
+    if (!plugin) {
+      return res.status(404).json({ 
+        authenticated: false, 
+        error: 'Plugin not found' 
+      });
+    }
+
+    // Check if password matches
+    const isAuthenticated = plugin.password === password;
+
+    res.json({ isAuthenticated });
+  } catch (error) {
+    console.error('Error authenticating plugin:', error);
+    res.status(500).json({ 
+      authenticated: false, 
+      error: 'Authentication failed' 
+    });
+  }
+});
+
 // API endpoint to get a single plugin by slug
 app.get('/api/plugins/:slug', authenticatePluginRequest, async (req, res) => {
   try {
