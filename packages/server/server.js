@@ -64,7 +64,6 @@ app.use(cors({
       return callback(null, true);
     }
 
-    console.log('made it here!')
     callback(null, true); // Allow all origins for now - auth middleware will handle specific domain checks
   },
   credentials: true
@@ -105,6 +104,9 @@ app.post('/api/plugins/:slug/auth', async (req, res) => {
   try {
     // Check for API key in header
     const apiKey = req.get('x-api-key') || req.get('authorization')?.replace('Bearer ', '');
+
+    console.log('API Key provided:', apiKey);
+    console.log('Expected API Key:', process.env.INTERNAL_API_KEY);
     
     if (!apiKey || apiKey !== process.env.INTERNAL_API_KEY) {
       return res.status(401).json({ 
